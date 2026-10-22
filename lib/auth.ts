@@ -3,7 +3,17 @@ import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { getDb } from './db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-change-me';
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Configuração obrigatória ausente: JWT_SECRET não definida no ambiente.');
+    }
+    return 'development-temporary-jwt-secret-key-12345';
+  }
+  return secret;
+};
+
 const TOKEN_EXPIRY = '24h';
 const COOKIE_NAME = 'peixoto_admin_token';
 
@@ -32,14 +42,14 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 export function createToken(user: AdminUser): string {
   return jwt.sign(
     { userId: user.id, username: user.username, name: user.name, role: user.role },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: TOKEN_EXPIRY }
   );
 }
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    return jwt.verify(token, getJwtSecret()) as JWTPayload;
   } catch {
     return null;
   }

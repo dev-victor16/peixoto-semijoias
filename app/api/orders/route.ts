@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
       // Validate all items
       const validatedItems: {
         product_id: number; product_name: string; product_sku: string;
-        variation_type?: string; variation_value?: string;
-        quantity: number; unit_price: number; subtotal: number; image_url?: string;
+        variation_type?: string | null; variation_value?: string | null;
+        quantity: number; unit_price: number; subtotal: number; image_url?: string | null;
       }[] = [];
 
       for (const item of items) {
