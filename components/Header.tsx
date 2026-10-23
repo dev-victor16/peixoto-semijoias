@@ -31,6 +31,7 @@ export default function Header() {
       <header className="header" style={scrolled ? { boxShadow: '0 2px 12px rgba(0,0,0,0.06)' } : undefined}>
         <div className="header-inner">
           <Link href="/" className="header-logo">
+            <img src="/logo.png" alt="Peixoto Semi Joias" className="header-logo-img" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             <span className="header-logo-text">peixoto</span>
           </Link>
 
