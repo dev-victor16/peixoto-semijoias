@@ -19,17 +19,19 @@ export interface ProductCardData {
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem } = useCart();
+  const [selectedColor, setSelectedColor] = useState<'ouro' | 'prata'>('ouro');
   const [added, setAdded] = useState(false);
 
-  const isOutOfStock = product.stock_quantity <= 0;
-  const hasPromo = Boolean(product.is_promo && product.promo_price && product.promo_price < product.price);
-  const effectivePrice = hasPromo && product.promo_price ? product.promo_price : product.price;
+  const effectivePrice = product.promo_price && product.promo_price < product.price
+    ? product.promo_price
+    : product.price;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // Calculate 2x without interest installment
+  const installmentValue = (effectivePrice / 2).toFixed(2).replace('.', ',');
+
+  const handleBuy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (isOutOfStock) return;
 
     addItem({
       product_id: product.id,
@@ -38,6 +40,8 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       unit_price: effectivePrice,
       quantity: 1,
       image: product.image_url,
+      variation_type: 'Banho',
+      variation_value: selectedColor === 'ouro' ? 'Ouro 18k' : 'Prata 925',
       stock_available: product.stock_quantity
     });
 
@@ -46,63 +50,61 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   };
 
   return (
-    <div className="product-card">
-      <Link href={`/produtos/${product.slug}`} className="product-card-media">
+    <div className="ref-product-card">
+      {/* Product Image Link */}
+      <Link href={`/produtos/${product.slug}`} className="ref-product-media">
         {product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="product-card-img"
+            className="ref-product-img"
             loading="lazy"
           />
         ) : (
-          <div className="product-card-placeholder">
-            <span>✨</span>
-          </div>
+          <div className="ref-product-placeholder">✨</div>
         )}
-        {hasPromo && <span className="product-badge-promo">Oferta</span>}
-        {isOutOfStock && <span className="product-badge-stock">Sob Consulta</span>}
       </Link>
 
-      <div className="product-card-body">
-        {product.category_name && (
-          <span className="product-card-category">{product.category_name}</span>
-        )}
-        <h3 className="product-card-name">
+      {/* Color Dots */}
+      <div className="ref-color-dots">
+        <button
+          type="button"
+          onClick={() => setSelectedColor('ouro')}
+          className={`ref-color-dot dot-ouro ${selectedColor === 'ouro' ? 'active' : ''}`}
+          title="Banho Ouro 18k"
+          aria-label="Ouro 18k"
+        />
+        <button
+          type="button"
+          onClick={() => setSelectedColor('prata')}
+          className={`ref-color-dot dot-prata ${selectedColor === 'prata' ? 'active' : ''}`}
+          title="Prata 925"
+          aria-label="Prata 925"
+        />
+      </div>
+
+      {/* Product Details */}
+      <div className="ref-product-body">
+        <h3 className="ref-product-name">
           <Link href={`/produtos/${product.slug}`}>{product.name}</Link>
         </h3>
 
-        <div className="product-card-prices">
-          {hasPromo && product.promo_price ? (
-            <>
-              <span className="product-card-price-promo">
-                R$ {product.promo_price.toFixed(2).replace('.', ',')}
-              </span>
-              <span className="product-card-price-old">
-                R$ {product.price.toFixed(2).replace('.', ',')}
-              </span>
-            </>
-          ) : (
-            <span className="product-card-price">
-              R$ {product.price.toFixed(2).replace('.', ',')}
-            </span>
-          )}
+        <div className="ref-product-price">
+          R$ {effectivePrice.toFixed(2).replace('.', ',')}
         </div>
 
+        <div className="ref-product-installments">
+          2 X DE R$ {installmentValue} SEM JUROS
+        </div>
+
+        {/* COMPRAR Button */}
         <button
           type="button"
-          onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className={`btn btn-block product-card-btn ${isOutOfStock ? 'btn-disabled' : 'btn-primary'}`}
-          title={isOutOfStock ? 'Peça sob consulta' : 'Adicionar à sacola de compras'}
+          onClick={handleBuy}
+          className="ref-product-btn"
+          title="Adicionar à sacola e finalizar pelo WhatsApp"
         >
-          {isOutOfStock ? (
-            'Sob Consulta'
-          ) : added ? (
-            '✓ Adicionado!'
-          ) : (
-            <>🛍️ Adicionar à Sacola</>
-          )}
+          {added ? '✓ ADICIONADO!' : 'COMPRAR'}
         </button>
       </div>
     </div>

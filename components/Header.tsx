@@ -1,21 +1,14 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from './CartProvider';
 import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const { totalItems, totalPrice, setIsOpen } = useCart();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,83 +19,87 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Announcement Bar */}
-      <div className="top-bar">
-        <div className="container top-bar-inner">
-          <span className="top-bar-announcement">
-            ✨ Peixoto Semi Joias • Catálogo Digital com Atendimento Exclusivo no WhatsApp
-          </span>
-          <div className="top-bar-links">
-            <span className="top-bar-pill">Banho Ouro 18k & Prata 925</span>
+      {/* 1. Top Bar / Faixa Superior */}
+      <div className="ref-top-bar">
+        <div className="ref-top-bar-container">
+          <div className="ref-top-bar-left">
+            <span>(11) 99999-9999</span>
+            <span className="ref-top-bar-sep">|</span>
+            <span>contato@peixotosemijoias.com.br</span>
+          </div>
+
+          <div className="ref-top-bar-center">
+            <span>♡ SUA PRIMEIRA VEZ AQUI? USE O CUPOM <strong>PRIMEIRACOMPRA</strong> E GANHE 5% OFF ♡</span>
+          </div>
+
+          <div className="ref-top-bar-right">
+            <span>Atendimento VIP • WhatsApp</span>
           </div>
         </div>
       </div>
 
-      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-        <div className="header-inner">
+      {/* 2. Main Pink Header / Cabeçalho Rosa */}
+      <header className="ref-header">
+        <div className="ref-header-container">
           {/* Logo */}
-          <Link href="/" className="header-logo">
-            <img
-              src="/logo.png"
-              alt="Peixoto Semi Joias"
-              className="header-logo-img"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-            <span className="header-logo-text">peixoto</span>
+          <Link href="/" className="ref-header-logo">
+            <div className="ref-logo-box">
+              <span className="ref-logo-main">Peixoto Semi Joias</span>
+              <span className="ref-logo-sub">CATÁLOGO EXCLUSIVO</span>
+            </div>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="header-nav">
-            <Link href="/" className={pathname === '/' ? 'active' : ''}>Início</Link>
-            <Link href="/produtos" className={pathname === '/produtos' ? 'active' : ''}>Catálogo</Link>
-            <Link href="/produtos?category=brincos">Brincos</Link>
-            <Link href="/produtos?category=colares">Colares</Link>
-            <Link href="/produtos?category=aneis">Anéis</Link>
-            <Link href="/produtos?category=pulseiras">Pulseiras</Link>
+          <nav className="ref-header-nav">
+            <Link href="/" className={pathname === '/' ? 'active' : ''}>
+              ÚLTIMOS LANÇAMENTOS
+            </Link>
+            <Link href="/produtos?category=brincos">BRINCOS</Link>
+            <Link href="/produtos?category=colares">COLARES</Link>
+            <Link href="/produtos?category=aneis">ANÉIS</Link>
+            <Link href="/produtos?category=pulseiras">PULSEIRAS</Link>
+            <Link href="/produtos?category=conjuntos">CONJUNTOS</Link>
           </nav>
 
-          {/* Actions: Search & Cart Button */}
-          <div className="header-actions">
-            <div className="header-search">
-              <form onSubmit={handleSearch}>
-                <span className="header-search-icon">🔍</span>
-                <input
-                  type="text"
-                  placeholder="Buscar no catálogo..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                />
-              </form>
-            </div>
+          {/* Search Bar & Bag Icon */}
+          <div className="ref-header-actions">
+            {/* Search Pill Input */}
+            <form onSubmit={handleSearch} className="ref-search-form">
+              <span className="ref-search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="ref-search-input"
+              />
+            </form>
 
-            {/* Shopping Bag Button (Triggers lateral drawer) */}
+            {/* Shopping Cart / Bag */}
             <button
               type="button"
-              className="header-cart"
+              className="ref-cart-btn"
               onClick={() => setIsOpen(true)}
-              aria-label={`Abrir sacola com ${totalItems} itens`}
-              title="Ver sacola de produtos"
+              aria-label="Abrir sacola de compras"
+              title="Ver sacola de compras"
             >
-              <span className="header-cart-icon">🛍️</span>
-              <div className="header-cart-meta">
-                <span className="header-cart-title">Sacola</span>
-                {totalPrice > 0 && (
-                  <span className="header-cart-val">
-                    R$ {totalPrice.toFixed(2).replace('.', ',')}
-                  </span>
+              <span className="ref-cart-icon">🛒</span>
+              <div className="ref-cart-info">
+                <span className="ref-cart-value">
+                  R$ {totalPrice > 0 ? totalPrice.toFixed(2).replace('.', ',') : '0,00'}
+                </span>
+                {totalItems > 0 && (
+                  <span className="ref-cart-badge">{totalItems}</span>
                 )}
               </div>
-              {totalItems > 0 && (
-                <span className="header-cart-count">{totalItems}</span>
-              )}
             </button>
 
-            {/* Mobile Menu Hamburger */}
+            {/* Mobile Hamburger Button */}
             <button
               type="button"
-              className="mobile-menu-btn"
+              className="ref-mobile-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Abrir menu"
+              aria-label="Menu"
             >
               {mobileMenuOpen ? '✕' : '☰'}
             </button>
@@ -110,38 +107,38 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mobile Menu Slide */}
+      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="mobile-menu-overlay">
-          <form onSubmit={handleSearch} className="mobile-search-form">
+        <div className="ref-mobile-menu">
+          <form onSubmit={handleSearch} className="ref-mobile-search">
             <input
               type="text"
-              placeholder="Buscar no catálogo..."
+              placeholder="Buscar semijoias..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="form-input"
+              className="ref-search-input"
             />
           </form>
 
-          <div className="mobile-menu-links">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>Início</Link>
-            <Link href="/produtos" onClick={() => setMobileMenuOpen(false)}>Todos os Produtos</Link>
-            <Link href="/produtos?category=brincos" onClick={() => setMobileMenuOpen(false)}>Brincos</Link>
-            <Link href="/produtos?category=colares" onClick={() => setMobileMenuOpen(false)}>Colares</Link>
-            <Link href="/produtos?category=aneis" onClick={() => setMobileMenuOpen(false)}>Anéis</Link>
-            <Link href="/produtos?category=pulseiras" onClick={() => setMobileMenuOpen(false)}>Pulseiras</Link>
+          <nav className="ref-mobile-nav">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)}>ÚLTIMOS LANÇAMENTOS</Link>
+            <Link href="/produtos?category=brincos" onClick={() => setMobileMenuOpen(false)}>BRINCOS</Link>
+            <Link href="/produtos?category=colares" onClick={() => setMobileMenuOpen(false)}>COLARES</Link>
+            <Link href="/produtos?category=aneis" onClick={() => setMobileMenuOpen(false)}>ANÉIS</Link>
+            <Link href="/produtos?category=pulseiras" onClick={() => setMobileMenuOpen(false)}>PULSEIRAS</Link>
+            <Link href="/produtos?category=conjuntos" onClick={() => setMobileMenuOpen(false)}>CONJUNTOS</Link>
 
             <button
               type="button"
-              className="mobile-bag-trigger"
+              className="ref-mobile-bag-btn"
               onClick={() => {
                 setMobileMenuOpen(false);
                 setIsOpen(true);
               }}
             >
-              🛍️ Abrir Minha Sacola ({totalItems} itens)
+              🛒 ABRIR SACOLA ({totalItems} ITENS - R$ {totalPrice.toFixed(2).replace('.', ',')})
             </button>
-          </div>
+          </nav>
         </div>
       )}
     </>

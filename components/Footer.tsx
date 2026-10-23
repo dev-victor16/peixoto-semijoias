@@ -2,65 +2,95 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-interface Settings { [key: string]: string }
+interface StoreSettings {
+  whatsapp_number?: string;
+  email?: string;
+  store_name?: string;
+}
 
 export default function Footer() {
-  const [s, setS] = useState<Settings>({});
+  const [settings, setSettings] = useState<StoreSettings>({
+    whatsapp_number: '(11) 99999-9999',
+    email: 'contato@peixotosemijoias.com.br',
+    store_name: 'Peixoto Semi Joias'
+  });
 
   useEffect(() => {
-    fetch('/api/settings').then(r => r.json()).then(setS).catch(() => {});
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        if (data && !data.error) {
+          setSettings(prev => ({
+            ...prev,
+            whatsapp_number: data.whatsapp_number || prev.whatsapp_number,
+            email: data.email || prev.email,
+            store_name: data.store_name || prev.store_name
+          }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (
-    <footer className="footer">
-      <div className="footer-grid">
-        <div className="footer-brand">
-          <div className="footer-brand-name">{s.store_name || 'Peixoto Semi Joias'}</div>
-          <p>{s.store_description || 'Semijoias exclusivas com design sofisticado e elegante.'}</p>
-          <div className="footer-social">
-            {s.instagram && (
-              <a href={`https://instagram.com/${s.instagram?.replace('@', '')}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram">📷</a>
-            )}
-            {s.whatsapp_number && (
-              <a href={`https://wa.me/${s.whatsapp_number}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
-            )}
-            {s.email && (
-              <a href={`mailto:${s.email}`} aria-label="Email">✉️</a>
-            )}
+    <footer className="ref-footer">
+      <div className="ref-footer-container">
+        {/* Column 1: Navegação */}
+        <div className="ref-footer-col">
+          <h4 className="ref-footer-heading">NAVEGAÇÃO</h4>
+          <ul className="ref-footer-links">
+            <li><Link href="/">ÚLTIMOS LANÇAMENTOS</Link></li>
+            <li><Link href="/produtos?category=brincos">BRINCOS</Link></li>
+            <li><Link href="/produtos?category=colares">COLARES</Link></li>
+            <li><Link href="/produtos?category=aneis">ANÉIS</Link></li>
+            <li><Link href="/produtos?category=pulseiras">PULSEIRAS</Link></li>
+            <li><Link href="/produtos?category=conjuntos">CONJUNTOS</Link></li>
+          </ul>
+        </div>
+
+        {/* Column 2: Meios de Pagamento e Envio */}
+        <div className="ref-footer-col">
+          <h4 className="ref-footer-heading">MEIOS DE PAGAMENTO</h4>
+          <div className="ref-payment-badges">
+            <span className="ref-pay-badge visa">VISA</span>
+            <span className="ref-pay-badge master">Mastercard</span>
+            <span className="ref-pay-badge elo">ELO</span>
+            <span className="ref-pay-badge hiper">Hipercard</span>
+            <span className="ref-pay-badge pix">PIX</span>
+            <span className="ref-pay-badge boleto">Boleto</span>
+          </div>
+
+          <h4 className="ref-footer-heading" style={{ marginTop: '1.25rem' }}>FORMAS DE ENVIO</h4>
+          <div className="ref-shipping-badges">
+            <span className="ref-ship-badge">📦 CORREIOS / PAC & SEDEX</span>
           </div>
         </div>
-        <div>
-          <div className="footer-title">Categorias</div>
-          <ul className="footer-links">
-            <li><Link href="/produtos?category=brincos">Brincos</Link></li>
-            <li><Link href="/produtos?category=colares">Colares</Link></li>
-            <li><Link href="/produtos?category=aneis">Anéis</Link></li>
-            <li><Link href="/produtos?category=pulseiras">Pulseiras</Link></li>
-            <li><Link href="/produtos?category=conjuntos">Conjuntos</Link></li>
+
+        {/* Column 3: Contato */}
+        <div className="ref-footer-col">
+          <h4 className="ref-footer-heading">CONTATO</h4>
+          <ul className="ref-footer-contact">
+            <li>
+              <span className="ref-contact-icon">📞</span>
+              <span>{settings.whatsapp_number}</span>
+            </li>
+            <li>
+              <span className="ref-contact-icon">✉️</span>
+              <span>{settings.email}</span>
+            </li>
+            <li>
+              <span className="ref-contact-icon">📍</span>
+              <span>Atendimento online com envio para todo o Brasil</span>
+            </li>
           </ul>
-        </div>
-        <div>
-          <div className="footer-title">Informações</div>
-          <ul className="footer-links">
-            <li><Link href="/produtos">Todos os Produtos</Link></li>
-            <li><Link href="/produtos?is_new=1">Lançamentos</Link></li>
-            <li><Link href="/produtos?is_promo=1">Promoções</Link></li>
-          </ul>
-        </div>
-        <div>
-          <div className="footer-title">Atendimento</div>
-          <ul className="footer-links">
-            {s.whatsapp_number && <li><a href={`https://wa.me/${s.whatsapp_number}`} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>}
-            {s.email && <li><a href={`mailto:${s.email}`}>{s.email}</a></li>}
-            {s.instagram && <li><a href={`https://instagram.com/${s.instagram?.replace('@', '')}`} target="_blank" rel="noopener noreferrer">{s.instagram}</a></li>}
-          </ul>
-          <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: 'var(--gray-400)', lineHeight: 1.6 }}>
-            {s.warranty_info && <p>{s.warranty_info}</p>}
-          </div>
         </div>
       </div>
-      <div className="footer-bottom">
-        © {new Date().getFullYear()} {s.store_name || 'Peixoto Semi Joias'}. Todos os direitos reservados.
+
+      {/* Copyright Bar */}
+      <div className="ref-footer-bottom">
+        <div className="ref-footer-container ref-bottom-inner">
+          <span>Copyright {settings.store_name} - {new Date().getFullYear()}. Todos os direitos reservados.</span>
+          <span className="ref-bottom-credit">Catálogo Digital Oficial</span>
+        </div>
       </div>
     </footer>
   );
