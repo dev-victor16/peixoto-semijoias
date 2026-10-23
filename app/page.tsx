@@ -41,12 +41,12 @@ function getHomeData() {
     // Featured & Highlights products
     const featuredProducts = db.prepare(`
       SELECT 
-        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.short_description, p.stock_quantity,
+        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.description as short_description, p.stock_quantity,
         c.name as category_name, c.slug as category_slug,
         (SELECT url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as image_url
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.published = 1 AND (p.featured = 1 OR p.highlight = 1)
+      WHERE p.published = 1 AND (p.featured = 1 OR p.is_new = 1)
       ORDER BY p.sort_order ASC, p.id DESC
       LIMIT 8
     `).all() as ProductCardData[];
@@ -54,7 +54,7 @@ function getHomeData() {
     // New releases / all products if few featured
     const newProducts = db.prepare(`
       SELECT 
-        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.short_description, p.stock_quantity,
+        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.description as short_description, p.stock_quantity,
         c.name as category_name, c.slug as category_slug,
         (SELECT url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as image_url
       FROM products p
