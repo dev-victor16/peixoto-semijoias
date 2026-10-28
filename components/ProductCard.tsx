@@ -26,7 +26,6 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
     ? product.promo_price
     : product.price;
 
-  // Calculate 2x without interest installment
   const installmentValue = (effectivePrice / 2).toFixed(2).replace('.', ',');
 
   const handleBuy = (e: React.MouseEvent) => {
@@ -61,7 +60,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
             loading="lazy"
           />
         ) : (
-          <div className="ref-product-placeholder">✨</div>
+          <div className="ref-product-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8894a8" strokeWidth="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
         )}
       </Link>
 
@@ -94,7 +99,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         </div>
 
         <div className="ref-product-installments">
-          2 X DE R$ {installmentValue} SEM JUROS
+          2x de R$ {installmentValue} sem juros
         </div>
 
         {/* COMPRAR Button */}
@@ -102,9 +107,9 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           type="button"
           onClick={handleBuy}
           className="ref-product-btn"
-          title="Adicionar à sacola e finalizar pelo WhatsApp"
+          title="Adicionar à sacola e consultar no WhatsApp"
         >
-          {added ? '✓ ADICIONADO!' : 'COMPRAR'}
+          {added ? 'ADICIONADO' : 'COMPRAR'}
         </button>
       </div>
     </div>

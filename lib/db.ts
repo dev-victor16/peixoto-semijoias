@@ -192,30 +192,37 @@ function initializeSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_orders_number ON orders(order_number);
     CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
     CREATE INDEX IF NOT EXISTS idx_stock_movements_product ON stock_movements(product_id);
+    CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_price_history_product ON price_history(product_id);
     CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images(product_id);
     CREATE INDEX IF NOT EXISTS idx_product_variations_product ON product_variations(product_id);
   `);
 
-  // Seed default settings if empty
+  // 1. Seed default settings if empty
   const settingsCount = db.prepare('SELECT COUNT(*) as count FROM store_settings').get() as { count: number };
   if (settingsCount.count === 0) {
     const defaultSettings = [
       ['store_name', 'Peixoto Semi Joias'],
-      ['store_description', 'Semijoias exclusivas com design sofisticado e elegante. Peças que valorizam a sua beleza com qualidade e estilo.'],
+      ['store_description', 'Catálogo de semijoias com acabamento sofisticado e garantia. Peças banhadas em ouro 18k e prata 925.'],
       ['whatsapp_number', process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'],
       ['instagram', '@peixotosemijoias'],
       ['email', 'contato@peixotosemijoias.com.br'],
       ['address', ''],
-      ['about_text', 'A Peixoto Semi Joias nasceu do amor por acessórios que fazem a diferença. Cada peça é cuidadosamente selecionada para oferecer sofisticação, qualidade e estilo a preços acessíveis. Nossas semijoias são banhadas a ouro 18k, com garantia de durabilidade e brilho duradouro.'],
-      ['shipping_info', 'Enviamos para todo o Brasil. Consulte prazos e valores pelo WhatsApp.'],
-      ['return_policy', 'Aceitamos trocas em até 7 dias após o recebimento, desde que a peça esteja em perfeitas condições e na embalagem original.'],
-      ['warranty_info', 'Todas as nossas peças possuem garantia de 6 meses contra defeitos de fabricação.'],
-      ['banner_title', 'Coleção Exclusiva'],
-      ['banner_subtitle', 'Descubra peças que combinam sofisticação e elegância para todos os momentos'],
-      ['banner_cta', 'Explorar Coleção'],
-      ['meta_title', 'Peixoto Semi Joias | Semijoias Exclusivas'],
-      ['meta_description', 'Loja online de semijoias exclusivas. Brincos, colares, anéis, pulseiras e conjuntos com design sofisticado e qualidade premium.'],
+      ['about_text', 'A Peixoto Semi Joias oferece semijoias com acabamento refinado e garantia. Nossas peças recebem banho de alta qualidade em ouro 18k e prata 925, pensadas para acompanhar você com elegância em todos os momentos.'],
+      ['shipping_info', 'Enviamos para todo o Brasil. Detalhes de envio e prazos são informados diretamente no atendimento via WhatsApp.'],
+      ['return_policy', 'Solicitações de troca podem ser feitas em até 7 dias corridos após o recebimento da peça.'],
+      ['warranty_info', 'Garantia de 6 meses no banho e defeitos de fabricação.'],
+      ['banner_title', 'Catálogo Peixoto Semi Joias'],
+      ['banner_subtitle', 'Conheça nossa seleção de peças com acabamento refinado'],
+      ['banner_cta', 'Ver Catálogo'],
+      ['meta_title', 'Peixoto Semi Joias | Catálogo Digital'],
+      ['meta_description', 'Catálogo digital de semijoias Peixoto. Brincos, colares, anéis e pulseiras com finalização e atendimento direto pelo WhatsApp.'],
       ['low_stock_threshold', '3'],
     ];
     const insertSetting = db.prepare('INSERT OR IGNORE INTO store_settings (key, value) VALUES (?, ?)');
@@ -225,6 +232,102 @@ function initializeSchema(db: Database.Database) {
       }
     });
     insertMany();
+  }
+
+  // 2. Seed default categories if empty
+  const catCount = db.prepare('SELECT COUNT(*) as count FROM categories').get() as { count: number };
+  if (catCount.count === 0) {
+    const defaultCategories = [
+      ['Brincos', 'brincos', 1],
+      ['Colares', 'colares', 2],
+      ['Anéis', 'aneis', 3],
+      ['Pulseiras', 'pulseiras', 4],
+      ['Conjuntos', 'conjuntos', 5]
+    ];
+    const insertCat = db.prepare('INSERT INTO categories (name, slug, sort_order, active, featured) VALUES (?, ?, ?, 1, 1)');
+    const seedCategories = db.transaction(() => {
+      for (const [name, slug, sort] of defaultCategories) {
+        insertCat.run(name, slug, sort);
+      }
+    });
+    seedCategories();
+  }
+
+  // 3. Seed default products if empty (Ensures catalog is never blank on Render or new deploys)
+  const prodCount = db.prepare('SELECT COUNT(*) as count FROM products').get() as { count: number };
+  if (prodCount.count === 0) {
+    const brincosCat = db.prepare("SELECT id FROM categories WHERE slug = 'brincos'").get() as { id: number } | undefined;
+    const colaresCat = db.prepare("SELECT id FROM categories WHERE slug = 'colares'").get() as { id: number } | undefined;
+    const aneisCat = db.prepare("SELECT id FROM categories WHERE slug = 'aneis'").get() as { id: number } | undefined;
+    const pulseirasCat = db.prepare("SELECT id FROM categories WHERE slug = 'pulseiras'").get() as { id: number } | undefined;
+
+    const initialProducts = [
+      {
+        name: 'BRINCO GOTA ZIRCÔNIA LUXO',
+        slug: 'brinco-gota-zirconia-luxo',
+        description: 'Brinco formato gota com micro zircônias e banho antialérgico.',
+        sku: 'PX-BRI-001',
+        category_id: brincosCat?.id ?? null,
+        price: 149.90,
+        promo_price: null,
+        stock_quantity: 12,
+        image_url: '/images/products/brinco-gota.jpg'
+      },
+      {
+        name: 'COLAR PONTO DE LUZ VENEZIANA',
+        slug: 'colar-ponto-de-luz-veneziana',
+        description: 'Colar com corrente veneziana e pingente ponto de luz em zircônia cristal.',
+        sku: 'PX-COL-002',
+        category_id: colaresCat?.id ?? null,
+        price: 149.90,
+        promo_price: null,
+        stock_quantity: 15,
+        image_url: '/images/products/colar-ponto-de-luz.jpg'
+      },
+      {
+        name: 'ANEL SOLITÁRIO CRAVEJADO',
+        slug: 'anel-solitario-cravejado',
+        description: 'Anel solitário clássico com aro cravejado e pedra central lapidada.',
+        sku: 'PX-ANE-003',
+        category_id: aneisCat?.id ?? null,
+        price: 54.90,
+        promo_price: null,
+        stock_quantity: 20,
+        image_url: '/images/products/anel-solitario.jpg'
+      },
+      {
+        name: 'PULSEIRA RIVIERA CRISTAIS',
+        slug: 'pulseira-riviera-cristais',
+        description: 'Pulseira estilo riviera articulada com cristais cravejados individualmente.',
+        sku: 'PX-PUL-004',
+        category_id: pulseirasCat?.id ?? null,
+        price: 89.90,
+        promo_price: null,
+        stock_quantity: 8,
+        image_url: '/images/products/pulseira-riviera.jpg'
+      }
+    ];
+
+    const insertProd = db.prepare(`
+      INSERT INTO products (name, slug, description, sku, category_id, price, promo_price, stock_quantity, published, featured, is_new, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 1, ?)
+    `);
+    const insertImg = db.prepare(`
+      INSERT INTO product_images (product_id, url, alt, sort_order, is_primary)
+      VALUES (?, ?, ?, 0, 1)
+    `);
+
+    const seedProducts = db.transaction(() => {
+      let sort = 1;
+      for (const p of initialProducts) {
+        const res = insertProd.run(
+          p.name, p.slug, p.description, p.sku, p.category_id, p.price, p.promo_price, p.stock_quantity, sort++
+        );
+        const productId = res.lastInsertRowid;
+        insertImg.run(productId, p.image_url, p.name);
+      }
+    });
+    seedProducts();
   }
 }
 
