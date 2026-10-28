@@ -66,7 +66,7 @@ export default function Header() {
             </button>
           </div>
 
-          {/* CENTRO: Logo Oficial Centralizada */}
+          {/* CENTRO: Logo Oficial Centralizada (Apenas a imagem da Logo, sem escrita) */}
           <div className="ref-header-center">
             <Link href="/" className="ref-header-logo-center">
               <img
@@ -74,10 +74,6 @@ export default function Header() {
                 alt="Peixoto Semi Joias"
                 className="ref-header-logo-img"
               />
-              <div className="ref-logo-box">
-                <span className="ref-logo-main">peixoto</span>
-                <span className="ref-logo-sub">SEMI JOIAS</span>
-              </div>
             </Link>
           </div>
 
@@ -160,18 +156,6 @@ export default function Header() {
             </button>
           </div>
         </div>
-
-        {/* Sub-barra de categorias desktop */}
-        <nav className="ref-header-quick-nav" aria-label="Navegação rápida por categorias">
-          <Link href="/" className={pathname === '/' ? 'active' : ''}>
-            DESTAQUES
-          </Link>
-          <Link href="/produtos?category=brincos">BRINCOS</Link>
-          <Link href="/produtos?category=colares">COLARES</Link>
-          <Link href="/produtos?category=aneis">ANÉIS</Link>
-          <Link href="/produtos?category=pulseiras">PULSEIRAS</Link>
-          <Link href="/produtos?category=conjuntos">CONJUNTOS</Link>
-        </nav>
       </header>
 
       {/* 3. Menu Lateral / Drawer de Navegação */}
