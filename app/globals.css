@@ -4,16 +4,25 @@
    CSS RESET & VARIABLES (PALETA ROSA E BRANCA DA REFERÊNCIA)
    ======================================================== */
 :root {
-  --ref-pink: #ff8fa3;
-  --ref-pink-dark: #f37089;
-  --ref-pink-light: #fff0f3;
-  --ref-pink-badge: #ff758f;
+  /* Cores Extraídas da Logo Oficial Peixoto Semi Joias */
+  --brand-primary: #576C99;         /* Azul ardósia nobre do fundo da logo */
+  --brand-primary-dark: #435478;    /* Tom mais profundo para hover e contrastes */
+  --brand-primary-deep: #32405c;    /* Faixa inferior de direitos autorais */
+  --brand-lettering: #EAE1F4;       /* Tom pérola/champanhe da tipografia da logo */
+  --brand-light: #f2f5fa;           /* Fundo suave para pílulas e realces */
+  
+  /* Aliases para o sistema do site */
+  --ref-pink: var(--brand-primary);
+  --ref-pink-dark: var(--brand-primary-dark);
+  --ref-pink-light: var(--brand-light);
+  --ref-pink-badge: var(--brand-primary);
+  
   --ref-white: #ffffff;
   --ref-dark: #222222;
   --ref-gray-text: #666666;
   --ref-gray-light: #999999;
   --ref-gray-bg: #f9f9f9;
-  --ref-border: #e6e6e6;
+  --ref-border: #e2e8f0;
   --ref-whatsapp: #25d366;
   --ref-font: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --max-width: 1180px;
@@ -121,7 +130,16 @@ button {
 .ref-header-logo {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
+}
+
+.ref-header-logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .ref-logo-box {
@@ -130,20 +148,22 @@ button {
 }
 
 .ref-logo-main {
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   font-weight: 700;
-  color: var(--ref-white);
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  color: var(--brand-lettering);
+  letter-spacing: 0.04em;
+  line-height: 1;
   font-family: var(--ref-font);
 }
 
 .ref-logo-sub {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.2em;
+  color: var(--brand-lettering);
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  margin-top: 3px;
+  opacity: 0.9;
 }
 
 /* Navigation Links */
@@ -154,18 +174,19 @@ button {
 }
 
 .ref-header-nav a {
-  color: var(--ref-white);
+  color: var(--brand-lettering);
   font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 
 .ref-header-nav a:hover,
 .ref-header-nav a.active {
-  opacity: 0.85;
+  color: #ffffff;
+  opacity: 1;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -800,8 +821,8 @@ button {
    8. FOOTER ROSA COMPLETO (Exata reprodução da referência)
    ======================================================== */
 .ref-footer {
-  background-color: var(--ref-pink);
-  color: var(--ref-white);
+  background-color: var(--brand-primary);
+  color: var(--brand-lettering);
   padding: 3rem 0 0;
 }
 
@@ -824,7 +845,7 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 1.1rem;
-  color: var(--ref-white);
+  color: var(--brand-lettering);
 }
 
 .ref-footer-links {
@@ -837,12 +858,14 @@ button {
 .ref-footer-links a {
   font-size: 0.75rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  transition: opacity 0.2s ease;
+  color: var(--brand-lettering);
+  opacity: 0.9;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .ref-footer-links a:hover {
-  opacity: 0.7;
+  opacity: 1;
+  color: #ffffff;
 }
 
 .ref-payment-badges {
@@ -887,7 +910,7 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--brand-lettering);
 }
 
 .ref-contact-icon {
@@ -896,10 +919,10 @@ button {
 
 /* Bottom Bar */
 .ref-footer-bottom {
-  background-color: var(--ref-pink-dark);
+  background-color: var(--brand-primary-deep);
   padding: 0.9rem 0;
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--brand-lettering);
 }
 
 .ref-bottom-inner {
@@ -976,8 +999,8 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 1.1rem 1.4rem;
-  background-color: var(--ref-pink);
-  color: var(--ref-white);
+  background-color: var(--brand-primary);
+  color: var(--brand-lettering);
 }
 
 .cart-drawer-title {
@@ -986,6 +1009,7 @@ button {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
+  color: var(--brand-lettering);
 }
 
 .cart-drawer-count {
@@ -1003,7 +1027,7 @@ button {
   border: none;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  color: var(--ref-white);
+  color: var(--brand-lettering);
   font-size: 1rem;
   transition: background 0.2s ease;
 }
@@ -1013,12 +1037,12 @@ button {
 }
 
 .cart-drawer-notice {
-  background: var(--ref-pink-light);
+  background: var(--brand-light);
   padding: 0.55rem 1rem;
   font-size: 0.74rem;
-  color: var(--ref-pink-dark);
+  color: var(--brand-primary-dark);
   font-weight: 600;
-  border-bottom: 1px solid #f8d7df;
+  border-bottom: 1px solid #d8e2ee;
   text-align: center;
 }
 
@@ -1181,8 +1205,8 @@ button {
 }
 
 .cart-subtotal-box {
-  background: var(--ref-pink-light);
-  border: 1px solid #f6d2da;
+  background: var(--brand-light);
+  border: 1px solid #d8e2ee;
   border-radius: 3px;
   padding: 0.8rem;
   margin-bottom: 0.8rem;
@@ -1204,7 +1228,7 @@ button {
 .cart-subtotal-val {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--ref-pink-dark);
+  color: var(--brand-primary);
 }
 
 .cart-footer-disclaimer {

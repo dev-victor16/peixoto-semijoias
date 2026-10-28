@@ -41,11 +41,16 @@ export default function Header() {
       {/* 2. Main Pink Header / Cabeçalho Rosa */}
       <header className="ref-header">
         <div className="ref-header-container">
-          {/* Logo */}
+          {/* Logo Oficial */}
           <Link href="/" className="ref-header-logo">
+            <img
+              src="/logo.png"
+              alt="Peixoto Semi Joias"
+              className="ref-header-logo-img"
+            />
             <div className="ref-logo-box">
-              <span className="ref-logo-main">Peixoto Semi Joias</span>
-              <span className="ref-logo-sub">CATÁLOGO EXCLUSIVO</span>
+              <span className="ref-logo-main">peixoto</span>
+              <span className="ref-logo-sub">✦ SEMI JOIAS ✦</span>
             </div>
           </Link>
 

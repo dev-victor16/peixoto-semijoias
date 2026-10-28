@@ -54,7 +54,7 @@ export default function HomePage() {
                 >
                   <path
                     d="M35 15 C 45 10, 60 12, 70 20 C 75 25, 85 28, 90 38 C 92 48, 80 58, 75 68 C 68 78, 55 88, 45 92 C 38 88, 30 78, 25 65 C 18 55, 12 40, 20 28 C 25 20, 30 18, 35 15 Z"
-                    fill="#ff8fa3"
+                    fill="var(--brand-primary)"
                     opacity="0.9"
                   />
                 </svg>
