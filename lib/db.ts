@@ -215,14 +215,13 @@ function initializeSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date);
   `);
 
-  // Default admin user if none exists
-  const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get() as { count: number };
-  if (adminCount.count === 0) {
-    // Password hash for 'admin123'
-    const defaultHash = '$2b$12$okUwDpH8OZyERrfx/UfJj./hLZUiu/QPe05ii5Fy5ytqmdhycnnOe';
+  // Always guarantee default admin user exists
+  const defaultHash = '$2b$12$okUwDpH8OZyERrfx/UfJj./hLZUiu/QPe05ii5Fy5ytqmdhycnnOe';
+  const existingAdmin = db.prepare('SELECT id FROM admin_users WHERE username = ?').get('admin');
+  if (!existingAdmin) {
     db.prepare(`
-      INSERT OR IGNORE INTO admin_users (username, password_hash, name, role)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO admin_users (username, password_hash, name, role, active)
+      VALUES (?, ?, ?, ?, 1)
     `).run('admin', defaultHash, 'Administrador Peixoto', 'admin');
   }
 

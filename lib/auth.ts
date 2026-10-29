@@ -4,14 +4,7 @@ import { cookies } from 'next/headers';
 import { getDb } from './db';
 
 const getJwtSecret = (): string => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Configuração obrigatória ausente: JWT_SECRET não definida no ambiente.');
-    }
-    return 'development-temporary-jwt-secret-key-12345';
-  }
-  return secret;
+  return process.env.JWT_SECRET || 'peixoto-semijoias-secret-key-change-in-production-2024';
 };
 
 const TOKEN_EXPIRY = '24h';

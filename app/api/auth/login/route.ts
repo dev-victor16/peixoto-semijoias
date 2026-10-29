@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
     return response;
-  } catch {
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('Erro no login:', err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Erro interno no servidor' }, { status: 500 });
   }
 }
