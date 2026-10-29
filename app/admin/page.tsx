@@ -1200,227 +1200,247 @@ export default function AdminPage() {
       {/* MODAL: NOVO / EDITAR PRODUTO (USE PEIXOTO SEMIJOIAS) */}
       {showProductModal && (
         <div className="admin-modal-overlay" onClick={() => setShowProductModal(false)}>
-          <div className="admin-modal" style={{ borderRadius: '24px', maxWidth: '620px' }} onClick={e => e.stopPropagation()}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
             <div className="admin-modal-header">
               <div>
-                <h3 style={{ margin: 0 }}>{editingProduct ? 'Editar Semijoia' : 'Cadastrar Nova Semijoia'}</h3>
+                <h3>{editingProduct ? 'Editar Semijoia' : 'Cadastrar Nova Semijoia'}</h3>
                 <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                   {editingProduct ? `Editando código ${editingProduct.sku}` : 'Adicione uma nova peça ao catálogo oficial'}
                 </span>
               </div>
-              <button onClick={() => setShowProductModal(false)} className="admin-modal-close">✕</button>
+              <button onClick={() => setShowProductModal(false)} className="admin-modal-close" title="Fechar">✕</button>
             </div>
-            <form onSubmit={handleSaveProduct} className="admin-form">
-              <div className="zom-input-group">
-                <label className="zom-input-label">Nome da Semijoia *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Colar Elo Português Banho Ouro 18k"
-                  value={prodForm.name}
-                  onChange={e => setProdForm({ ...prodForm, name: e.target.value })}
-                  className="zom-input"
-                />
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.8rem' }}>
+            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+              <div className="admin-modal-body">
+                {/* 1. Identificação Básica */}
                 <div className="zom-input-group">
-                  <label className="zom-input-label">Banho / Acabamento</label>
-                  <select
-                    value={prodForm.materials}
-                    onChange={e => setProdForm({ ...prodForm, materials: e.target.value })}
-                    className="zom-input"
-                  >
-                    <option value="Banho Ouro 18k (10 milésimos)">Banho Ouro 18k (10 milésimos)</option>
-                    <option value="Banho Ouro 18k (5 milésimos)">Banho Ouro 18k (5 milésimos)</option>
-                    <option value="Prata 925 com Verniz Suíço">Prata 925 com Verniz Suíço</option>
-                    <option value="Banho Ródio Branco">Banho Ródio Branco</option>
-                    <option value="Banho Ródio Negro">Banho Ródio Negro</option>
-                    <option value="Banho Rosé Gold">Banho Rosé Gold</option>
-                    <option value="Hipoalergênico & Níquel Free">Hipoalergênico & Níquel Free</option>
-                  </select>
-                </div>
-
-                <div className="zom-input-group">
-                  <label className="zom-input-label">SKU / Referência</label>
+                  <label className="zom-input-label">Nome da Semijoia *</label>
                   <input
                     type="text"
-                    placeholder="PX-0001"
-                    value={prodForm.sku}
-                    onChange={e => setProdForm({ ...prodForm, sku: e.target.value })}
-                    className="zom-input"
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                <div className="zom-input-group">
-                  <label className="zom-input-label">Preço de Venda (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
                     required
-                    placeholder="149.90"
-                    value={prodForm.price}
-                    onChange={e => setProdForm({ ...prodForm, price: e.target.value })}
+                    placeholder="Ex: Colar Elo Português Banho Ouro 18k"
+                    value={prodForm.name}
+                    onChange={e => setProdForm({ ...prodForm, name: e.target.value })}
                     className="zom-input"
                   />
                 </div>
-                <div className="zom-input-group">
-                  <label className="zom-input-label">Preço de Custo (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    placeholder="45.00"
-                    value={prodForm.cost_price}
-                    onChange={e => setProdForm({ ...prodForm, cost_price: e.target.value })}
-                    className="zom-input"
-                  />
-                </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                <div className="zom-input-group">
-                  <label className="zom-input-label">Estoque Disponível</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={prodForm.stock_quantity}
-                    onChange={e => setProdForm({ ...prodForm, stock_quantity: e.target.value })}
-                    className="zom-input"
-                  />
-                </div>
-                <div className="zom-input-group">
-                  <label className="zom-input-label">Categoria</label>
-                  <select
-                    value={prodForm.category_id}
-                    onChange={e => setProdForm({ ...prodForm, category_id: e.target.value })}
-                    className="zom-input"
-                  >
-                    <option value="1">Brincos</option>
-                    <option value="2">Colares</option>
-                    <option value="3">Anéis</option>
-                    <option value="4">Pulseiras</option>
-                    <option value="5">Conjuntos</option>
-                  </select>
-                </div>
-              </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">Banho / Acabamento</label>
+                    <select
+                      value={prodForm.materials}
+                      onChange={e => setProdForm({ ...prodForm, materials: e.target.value })}
+                      className="zom-input"
+                    >
+                      <option value="Banho Ouro 18k (10 milésimos)">Banho Ouro 18k (10 milésimos)</option>
+                      <option value="Banho Ouro 18k (5 milésimos)">Banho Ouro 18k (5 milésimos)</option>
+                      <option value="Prata 925 com Verniz Suíço">Prata 925 com Verniz Suíço</option>
+                      <option value="Banho Ródio Branco">Banho Ródio Branco</option>
+                      <option value="Banho Ródio Negro">Banho Ródio Negro</option>
+                      <option value="Banho Rosé Gold">Banho Rosé Gold</option>
+                      <option value="Hipoalergênico & Níquel Free">Hipoalergênico & Níquel Free</option>
+                    </select>
+                  </div>
 
-              <div className="zom-input-group">
-                <label className="zom-input-label">Foto da Semijoia (Upload do Celular/PC ou Link)</label>
-                
-                {/* Opção 1: Upload Direto do Dispositivo */}
-                <div style={{
-                  border: '2px dashed rgba(91, 110, 154, 0.35)',
-                  backgroundColor: '#FAF7F3',
-                  borderRadius: '16px',
-                  padding: '1.2rem',
-                  textAlign: 'center',
-                  marginBottom: '0.8rem',
-                  position: 'relative'
-                }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="admin-product-file-upload"
-                    onChange={handleImageUpload}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      opacity: 0,
-                      cursor: 'pointer',
-                      width: '100%',
-                      height: '100%',
-                      zIndex: 10
-                    }}
-                    disabled={isUploading}
-                  />
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', pointerEvents: 'none' }}>
-                    <div style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      color: '#5B6E9A'
-                    }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '1.4rem' }}>
-                        {isUploading ? 'hourglass_top' : 'add_photo_alternate'}
-                      </span>
-                    </div>
-                    <strong style={{ fontSize: '0.82rem', color: '#1a2234' }}>
-                      {isUploading ? 'Enviando foto...' : 'Clique para selecionar foto do seu dispositivo'}
-                    </strong>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                      Suporta JPG, PNG, WEBP até 5MB
-                    </span>
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">Categoria</label>
+                    <select
+                      value={prodForm.category_id}
+                      onChange={e => setProdForm({ ...prodForm, category_id: e.target.value })}
+                      className="zom-input"
+                    >
+                      <option value="1">Brincos</option>
+                      <option value="2">Colares</option>
+                      <option value="3">Anéis</option>
+                      <option value="4">Pulseiras</option>
+                      <option value="5">Conjuntos</option>
+                    </select>
+                  </div>
+
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">SKU / Código Referência</label>
+                    <input
+                      type="text"
+                      placeholder="PX-0001"
+                      value={prodForm.sku}
+                      onChange={e => setProdForm({ ...prodForm, sku: e.target.value })}
+                      className="zom-input"
+                    />
                   </div>
                 </div>
 
-                {/* Opção 2: URL ou Link Direto */}
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                  <input
-                    type="text"
-                    placeholder="Ou cole a URL da imagem (ex: /images/products/brinco.jpg)"
-                    value={prodForm.image_url}
-                    onChange={e => setProdForm({ ...prodForm, image_url: e.target.value })}
-                    className="zom-input"
-                    style={{ flex: 1 }}
-                  />
-                  {prodForm.image_url.trim() ? (
-                    <div style={{ position: 'relative' }}>
-                      <img
-                        src={prodForm.image_url}
-                        alt="Prévia"
-                        className="admin-thumb"
-                        style={{ width: '50px', height: '50px' }}
-                        onError={e => {
-                          (e.target as HTMLImageElement).src = '/logo.png';
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setProdForm({ ...prodForm, image_url: '' })}
-                        style={{
-                          position: 'absolute',
-                          top: '-6px',
-                          right: '-6px',
-                          background: '#e11d48',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '18px',
-                          height: '18px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        title="Remover foto"
-                      >
-                        ✕
-                      </button>
+                {/* 2. Precificação & Estoque */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: '0.85rem',
+                  backgroundColor: '#f8fafc',
+                  padding: '1rem',
+                  borderRadius: '16px',
+                  border: '1px solid #f1f5f9',
+                  marginBottom: '1.2rem'
+                }}>
+                  <div className="zom-input-group" style={{ margin: 0 }}>
+                    <label className="zom-input-label">Preço Venda (R$) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="149.90"
+                      value={prodForm.price}
+                      onChange={e => setProdForm({ ...prodForm, price: e.target.value })}
+                      className="zom-input"
+                      style={{ backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                  <div className="zom-input-group" style={{ margin: 0 }}>
+                    <label className="zom-input-label">Preço Custo (R$) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="45.00"
+                      value={prodForm.cost_price}
+                      onChange={e => setProdForm({ ...prodForm, cost_price: e.target.value })}
+                      className="zom-input"
+                      style={{ backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                  <div className="zom-input-group" style={{ margin: 0 }}>
+                    <label className="zom-input-label">Estoque (Qtd)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={prodForm.stock_quantity}
+                      onChange={e => setProdForm({ ...prodForm, stock_quantity: e.target.value })}
+                      className="zom-input"
+                      style={{ backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Foto da Peça */}
+                <div className="zom-input-group">
+                  <label className="zom-input-label">Foto da Semijoia</label>
+                  
+                  {/* Card de Upload Direto */}
+                  <div style={{
+                    border: '2px dashed rgba(91, 110, 154, 0.3)',
+                    backgroundColor: '#FAF7F3',
+                    borderRadius: '16px',
+                    padding: '1.2rem',
+                    textAlign: 'center',
+                    marginBottom: '0.8rem',
+                    position: 'relative',
+                    transition: 'border-color 0.2s ease'
+                  }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="admin-product-file-upload"
+                      onChange={handleImageUpload}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        opacity: 0,
+                        cursor: 'pointer',
+                        width: '100%',
+                        height: '100%',
+                        zIndex: 10
+                      }}
+                      disabled={isUploading}
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', pointerEvents: 'none' }}>
+                      <div style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        color: '#5B6E9A'
+                      }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.4rem' }}>
+                          {isUploading ? 'hourglass_top' : 'add_photo_alternate'}
+                        </span>
+                      </div>
+                      <strong style={{ fontSize: '0.82rem', color: '#1a2234' }}>
+                        {isUploading ? 'Enviando foto...' : 'Escolher foto do celular ou computador'}
+                      </strong>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        Formatos JPG, PNG ou WEBP até 5MB
+                      </span>
                     </div>
-                  ) : null}
+                  </div>
+
+                  {/* Input Alternativo de URL & Miniatura */}
+                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="Ou cole o link da foto (opcional)"
+                      value={prodForm.image_url}
+                      onChange={e => setProdForm({ ...prodForm, image_url: e.target.value })}
+                      className="zom-input"
+                      style={{ flex: 1 }}
+                    />
+                    {prodForm.image_url.trim() ? (
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <img
+                          src={prodForm.image_url}
+                          alt="Prévia"
+                          className="admin-thumb"
+                          style={{ width: '48px', height: '48px' }}
+                          onError={e => {
+                            (e.target as HTMLImageElement).src = '/logo.png';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setProdForm({ ...prodForm, image_url: '' })}
+                          style={{
+                            position: 'absolute',
+                            top: '-6px',
+                            right: '-6px',
+                            background: '#e11d48',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                          }}
+                          title="Remover foto"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* 4. Descrição */}
+                <div className="zom-input-group" style={{ marginBottom: 0 }}>
+                  <label className="zom-input-label">Descrição & Cuidados</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Ex: Peça hipoalergênica com verniz antialérgico e garantia de 6 meses..."
+                    value={prodForm.description}
+                    onChange={e => setProdForm({ ...prodForm, description: e.target.value })}
+                    className="zom-input"
+                  />
                 </div>
               </div>
 
-              <div className="zom-input-group">
-                <label className="zom-input-label">Descrição / Detalhes de Garantia</label>
-                <textarea
-                  rows={2}
-                  placeholder="Ex: Peça hipoalergênica, acompanha certificado de garantia de 6 meses..."
-                  value={prodForm.description}
-                  onChange={e => setProdForm({ ...prodForm, description: e.target.value })}
-                  className="zom-input"
-                />
-              </div>
-
+              {/* Ações Fixas no Rodapé do Modal */}
               <div className="admin-modal-actions">
                 <button type="button" onClick={() => setShowProductModal(false)} className="admin-topbar-btn">
                   Cancelar
@@ -1437,64 +1457,82 @@ export default function AdminPage() {
       {/* MODAL: NOVO GASTO */}
       {showExpenseModal && (
         <div className="admin-modal-overlay" onClick={() => setShowExpenseModal(false)}>
-          <div className="admin-modal" style={{ borderRadius: '24px' }} onClick={e => e.stopPropagation()}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()}>
             <div className="admin-modal-header">
-              <h3>Registrar Despesa / Gasto</h3>
-              <button onClick={() => setShowExpenseModal(false)} className="admin-modal-close">✕</button>
-            </div>
-            <form onSubmit={handleSaveExpense} className="admin-form">
-              <div className="zom-input-group">
-                <label className="zom-input-label">Descrição do Gasto *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Embalagens personalizadas com logo e fita de cetim"
-                  value={expenseForm.description}
-                  onChange={e => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                  className="zom-input"
-                />
+              <div>
+                <h3>Registrar Despesa / Gasto</h3>
+                <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                  Custos de fornecedor, embalagens, fotos e marketing da loja
+                </span>
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+              <button onClick={() => setShowExpenseModal(false)} className="admin-modal-close" title="Fechar">✕</button>
+            </div>
+            <form onSubmit={handleSaveExpense} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+              <div className="admin-modal-body">
                 <div className="zom-input-group">
-                  <label className="zom-input-label">Valor (R$) *</label>
+                  <label className="zom-input-label">Descrição do Gasto *</label>
                   <input
-                    type="number"
-                    step="0.01"
+                    type="text"
                     required
-                    placeholder="120.00"
-                    value={expenseForm.amount}
-                    onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+                    placeholder="Ex: Embalagens personalizadas com logo e fita de cetim"
+                    value={expenseForm.description}
+                    onChange={e => setExpenseForm({ ...expenseForm, description: e.target.value })}
                     className="zom-input"
                   />
                 </div>
-                <div className="zom-input-group">
-                  <label className="zom-input-label">Categoria</label>
-                  <select
-                    value={expenseForm.category}
-                    onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })}
-                    className="zom-input"
-                  >
-                    <option value="Galvânica & Banho de Ouro">Galvânica & Banho de Ouro (Fornecedor)</option>
-                    <option value="Pedrarias & Zircônias">Pedrarias & Zircônias</option>
-                    <option value="Embalagens & Sacolas">Embalagens, Caixas & Sacolas de Luxo</option>
-                    <option value="Fotos & Produção">Fotos, Modelos & Conteúdo</option>
-                    <option value="Marketing & Tráfego">Marketing & Anúncios (Instagram/Google)</option>
-                    <option value="Fretes & Entregas">Fretes & Taxas de Envio</option>
-                    <option value="Sistemas & Taxas">Sistemas, Maquininha & Taxas</option>
-                    <option value="Outros">Outros / Gastos Gerais</option>
-                  </select>
-                </div>
-              </div>
 
-              <div className="zom-input-group">
-                <label className="zom-input-label">Data</label>
-                <input
-                  type="date"
-                  value={expenseForm.expense_date}
-                  onChange={e => setExpenseForm({ ...expenseForm, expense_date: e.target.value })}
-                  className="zom-input"
-                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">Valor (R$) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      placeholder="120.00"
+                      value={expenseForm.amount}
+                      onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+                      className="zom-input"
+                    />
+                  </div>
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">Categoria</label>
+                    <select
+                      value={expenseForm.category}
+                      onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })}
+                      className="zom-input"
+                    >
+                      <option value="Galvânica & Banho de Ouro">Galvânica & Banho de Ouro (Fornecedor)</option>
+                      <option value="Pedrarias & Zircônias">Pedrarias & Zircônias</option>
+                      <option value="Embalagens & Sacolas">Embalagens, Caixas & Sacolas de Luxo</option>
+                      <option value="Fotos & Produção">Fotos, Modelos & Conteúdo</option>
+                      <option value="Marketing & Tráfego">Marketing & Anúncios (Instagram/Google)</option>
+                      <option value="Fretes & Entregas">Fretes & Taxas de Envio</option>
+                      <option value="Sistemas & Taxas">Sistemas, Maquininha & Taxas</option>
+                      <option value="Outros">Outros / Gastos Gerais</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="zom-input-group">
+                  <label className="zom-input-label">Data do Pagamento</label>
+                  <input
+                    type="date"
+                    value={expenseForm.expense_date}
+                    onChange={e => setExpenseForm({ ...expenseForm, expense_date: e.target.value })}
+                    className="zom-input"
+                  />
+                </div>
+
+                <div className="zom-input-group" style={{ marginBottom: 0 }}>
+                  <label className="zom-input-label">Observações / Detalhes (Opcional)</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Ex: Pago via PIX para o fornecedor do banho..."
+                    value={expenseForm.notes}
+                    onChange={e => setExpenseForm({ ...expenseForm, notes: e.target.value })}
+                    className="zom-input"
+                  />
+                </div>
               </div>
 
               <div className="admin-modal-actions">
