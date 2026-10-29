@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Erro ao realizar login');
+        throw new Error(data.error || 'Credenciais inválidas');
       }
 
       router.push('/admin');
@@ -35,54 +35,63 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="admin-login-container">
-      <div className="admin-login-card">
-        <div className="admin-login-header">
-          <img src="/logo.png" alt="Peixoto Semi Joias" className="admin-login-logo" />
-          <h2>Painel Administrativo</h2>
-          <p>Entre com suas credenciais de gestão da Use Peixoto</p>
+    <div className="zom-login-overlay">
+      <div className="zom-login-card">
+        {/* Badge / Logo */}
+        <div className="zom-login-badge">
+          <img src="/logo.png" alt="Use Peixoto" />
         </div>
 
-        {error && <div className="admin-alert-error">{error}</div>}
+        <h1 className="zom-login-title">Painel de Gestão</h1>
+        <p className="zom-login-sub">Use Peixoto Semi Joias • Acesso Restrito</p>
 
-        <form onSubmit={handleSubmit} className="admin-form">
-          <div className="admin-form-group">
-            <label htmlFor="username">Usuário</label>
+        {error && (
+          <div className="admin-alert-error" style={{ borderRadius: '16px', marginBottom: '1.5rem' }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="zom-input-group">
+            <label className="zom-input-label">Usuário ou E-mail</label>
             <input
-              id="username"
               type="text"
+              required
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="Ex: admin"
-              required
-              className="admin-input"
+              className="zom-input"
             />
           </div>
 
-          <div className="admin-form-group">
-            <label htmlFor="password">Senha</label>
+          <div className="zom-input-group">
+            <label className="zom-input-label">Senha Master</label>
             <input
-              id="password"
               type="password"
+              required
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              required
-              className="admin-input"
+              className="zom-input"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="admin-btn-primary admin-btn-full"
+            className="zom-btn-submit"
           >
-            {loading ? 'Entrando...' : 'Acessar Painel'}
+            {loading ? 'Entrando no Sistema...' : 'Entrar no Painel Master'}
           </button>
         </form>
 
-        <div className="admin-login-footer">
-          <a href="/" className="admin-back-link">← Voltar para a Loja Virtual</a>
+        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+          <a
+            href="/"
+            style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 700, textDecoration: 'none' }}
+          >
+            ← Voltar para a Loja Virtual
+          </a>
         </div>
       </div>
     </div>

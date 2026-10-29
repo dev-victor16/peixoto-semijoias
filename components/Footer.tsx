@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface StoreSettings {
   whatsapp_number?: string;
@@ -30,6 +31,12 @@ export default function Footer() {
       })
       .catch(() => {});
   }, []);
+
+  const pathname = usePathname();
+
+  if (pathname && pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <footer className="ref-footer">
