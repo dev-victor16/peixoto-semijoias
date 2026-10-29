@@ -209,16 +209,15 @@ button {
 }
 
 .ref-header-logo-img {
-  height: 48px;
+  height: 64px;
   width: auto;
-  max-width: 160px;
+  max-width: 220px;
   object-fit: contain;
-  border-radius: 6px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .ref-header-logo-img:hover {
-  transform: scale(1.03);
+  transform: scale(1.04);
   opacity: 0.95;
 }
 
@@ -1577,7 +1576,8 @@ button {
     font-size: 1.35rem;
   }
   .ref-header-logo-img {
-    height: 38px;
+    height: 48px;
+    max-width: 160px;
   }
   .ref-cart-value {
     display: none;
