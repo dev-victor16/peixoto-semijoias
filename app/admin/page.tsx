@@ -195,6 +195,8 @@ export default function AdminPage() {
     router.push('/admin/login');
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
   const openCreateProduct = () => {
     setEditingProduct(null);
     setProdForm({
@@ -227,6 +229,45 @@ export default function AdminPage() {
       published: prod.published === 1
     });
     setShowProductModal(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Por favor, selecione um arquivo de imagem válido.', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('A imagem deve ter no máximo 5MB.', 'error');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Falha ao enviar imagem');
+      }
+
+      const data = await res.json();
+      setProdForm(prev => ({ ...prev, image_url: data.url }));
+      showToast('Foto da semijoia carregada com sucesso!');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Erro no envio da foto', 'error');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -1267,26 +1308,105 @@ export default function AdminPage() {
               </div>
 
               <div className="zom-input-group">
-                <label className="zom-input-label">URL da Foto da Semijoia</label>
+                <label className="zom-input-label">Foto da Semijoia (Upload do Celular/PC ou Link)</label>
+                
+                {/* Opção 1: Upload Direto do Dispositivo */}
+                <div style={{
+                  border: '2px dashed rgba(91, 110, 154, 0.35)',
+                  backgroundColor: '#FAF7F3',
+                  borderRadius: '16px',
+                  padding: '1.2rem',
+                  textAlign: 'center',
+                  marginBottom: '0.8rem',
+                  position: 'relative'
+                }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="admin-product-file-upload"
+                    onChange={handleImageUpload}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      opacity: 0,
+                      cursor: 'pointer',
+                      width: '100%',
+                      height: '100%',
+                      zIndex: 10
+                    }}
+                    disabled={isUploading}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', pointerEvents: 'none' }}>
+                    <div style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                      color: '#5B6E9A'
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.4rem' }}>
+                        {isUploading ? 'hourglass_top' : 'add_photo_alternate'}
+                      </span>
+                    </div>
+                    <strong style={{ fontSize: '0.82rem', color: '#1a2234' }}>
+                      {isUploading ? 'Enviando foto...' : 'Clique para selecionar foto do seu dispositivo'}
+                    </strong>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      Suporta JPG, PNG, WEBP até 5MB
+                    </span>
+                  </div>
+                </div>
+
+                {/* Opção 2: URL ou Link Direto */}
                 <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
                   <input
                     type="text"
-                    placeholder="/images/products/brinco-gota.jpg ou link externo"
+                    placeholder="Ou cole a URL da imagem (ex: /images/products/brinco.jpg)"
                     value={prodForm.image_url}
                     onChange={e => setProdForm({ ...prodForm, image_url: e.target.value })}
                     className="zom-input"
                     style={{ flex: 1 }}
                   />
-                  {prodForm.image_url.trim() && (
-                    <img
-                      src={prodForm.image_url}
-                      alt="Prévia"
-                      className="admin-thumb"
-                      onError={e => {
-                        (e.target as HTMLImageElement).src = '/logo.png';
-                      }}
-                    />
-                  )}
+                  {prodForm.image_url.trim() ? (
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={prodForm.image_url}
+                        alt="Prévia"
+                        className="admin-thumb"
+                        style={{ width: '50px', height: '50px' }}
+                        onError={e => {
+                          (e.target as HTMLImageElement).src = '/logo.png';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setProdForm({ ...prodForm, image_url: '' })}
+                        style={{
+                          position: 'absolute',
+                          top: '-6px',
+                          right: '-6px',
+                          background: '#e11d48',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '18px',
+                          height: '18px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Remover foto"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
