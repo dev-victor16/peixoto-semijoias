@@ -30,6 +30,44 @@ export async function GET(request: NextRequest) {
     const revenue = (db.prepare(`SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'concluido' ${dateFilter}`).get(...dateParams) as { total: number }).total;
     const pendingValue = (db.prepare(`SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status NOT IN ('concluido', 'cancelado') ${dateFilter}`).get(...dateParams) as { total: number }).total;
 
+    // Custo das mercadorias vendidas (CMV) em pedidos concluídos
+    const cogsQuery = `
+      SELECT COALESCE(SUM(oi.quantity * COALESCE(p.cost_price, 0)), 0) as total_cost
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE o.status = 'concluido' ${dateFilter.replace(/created_at/g, 'o.created_at')}
+    `;
+    const costOfGoodsSold = (db.prepare(cogsQuery).get(...dateParams) as { total_cost: number }).total_cost;
+
+    // Despesas operacionais do período
+    let expenseDateFilter = '';
+    const expenseParams: string[] = [];
+    if (dateFrom) { expenseDateFilter += " AND expense_date >= ?"; expenseParams.push(dateFrom); }
+    if (dateTo) { expenseDateFilter += " AND expense_date <= ?"; expenseParams.push(dateTo); }
+
+    const totalExpenses = (db.prepare(
+      `SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE 1=1 ${expenseDateFilter}`
+    ).get(...expenseParams) as { total: number }).total;
+
+    // Lucro Bruto = Faturamento Concluído - Custo das Peças Vendidas
+    const grossProfit = revenue - costOfGoodsSold;
+
+    // Lucro Líquido = Lucro Bruto - Despesas
+    const netProfit = grossProfit - totalExpenses;
+
+    // Margem líquida
+    const netMargin = revenue > 0 ? ((netProfit / revenue) * 100) : 0;
+
+    // Valor total do inventário em estoque (a preço de custo e a preço de venda)
+    const inventoryStats = db.prepare(`
+      SELECT 
+        COALESCE(SUM(stock_quantity), 0) as total_units,
+        COALESCE(SUM(stock_quantity * price), 0) as retail_value,
+        COALESCE(SUM(stock_quantity * COALESCE(cost_price, 0)), 0) as cost_value
+      FROM products
+    `).get() as { total_units: number; retail_value: number; cost_value: number };
+
     // Top selling products (from completed orders)
     const topProducts = db.prepare(`
       SELECT oi.product_name, oi.product_sku, SUM(oi.quantity) as total_sold, SUM(oi.subtotal) as total_revenue,
@@ -59,7 +97,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       products: { total: totalProducts, published: publishedProducts, lowStock: lowStockProducts, outOfStock: outOfStockProducts },
       orders: { total: totalOrders, awaitingContact, inService, confirmed, completed, cancelled },
-      financial: { revenue, pendingValue },
+      financial: {
+        revenue,             // Faturamento bruto
+        costOfGoodsSold,     // Custo das mercadorias vendidas
+        grossProfit,         // Lucro bruto
+        totalExpenses,       // Total de gastos
+        netProfit,           // Lucro líquido
+        netMargin,           // Margem líquida %
+        pendingValue,        // Pedidos em andamento
+        inventory: inventoryStats
+      },
       topProducts,
       recentOrders,
       ordersByDay,

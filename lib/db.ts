@@ -184,6 +184,16 @@ function initializeSchema(db: Database.Database) {
       created_at TEXT DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS expenses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      description TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'Geral',
+      amount REAL NOT NULL,
+      expense_date TEXT NOT NULL DEFAULT (date('now')),
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
     CREATE INDEX IF NOT EXISTS idx_products_published ON products(published);
     CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
@@ -202,7 +212,19 @@ function initializeSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_price_history_product ON price_history(product_id);
     CREATE INDEX IF NOT EXISTS idx_product_images_product ON product_images(product_id);
     CREATE INDEX IF NOT EXISTS idx_product_variations_product ON product_variations(product_id);
+    CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date);
   `);
+
+  // Default admin user if none exists
+  const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get() as { count: number };
+  if (adminCount.count === 0) {
+    // Password hash for 'admin123'
+    const defaultHash = '$2b$12$okUwDpH8OZyERrfx/UfJj./hLZUiu/QPe05ii5Fy5ytqmdhycnnOe';
+    db.prepare(`
+      INSERT OR IGNORE INTO admin_users (username, password_hash, name, role)
+      VALUES (?, ?, ?, ?)
+    `).run('admin', defaultHash, 'Administrador Peixoto', 'admin');
+  }
 
   // 1. Seed default settings if empty
   const settingsCount = db.prepare('SELECT COUNT(*) as count FROM store_settings').get() as { count: number };

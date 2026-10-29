@@ -90,7 +90,12 @@ export default function Footer() {
       <div className="ref-footer-bottom">
         <div className="ref-footer-container ref-bottom-inner">
           <span>&copy; {new Date().getFullYear()} {settings.store_name}. Todos os direitos reservados.</span>
-          <span className="ref-bottom-credit">Catálogo Digital Oficial</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span className="ref-bottom-credit">Catálogo Digital Oficial</span>
+            <Link href="/admin" style={{ opacity: 0.4, fontSize: '0.65rem' }} title="Área Restrita">
+              🔒 Área Administrativa
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
