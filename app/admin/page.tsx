@@ -67,6 +67,7 @@ type TabType = 'dashboard' | 'financeiro' | 'produtos' | 'gastos' | 'pedidos' | 
 export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ name: string; username: string } | null>(null);
 
@@ -319,26 +320,43 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Overlay Backdrop Mobile */}
+      {mobileMenuOpen && (
+        <div
+          className="admin-mobile-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* ========================================================= */}
       {/* SIDEBAR NAVEGAÇÃO FIXA À ESQUERDA (ESTILO ZOM MULTIMARCAS) */}
       {/* ========================================================= */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div>
           {/* Logo & Marca */}
           <div className="admin-sidebar-brand">
             <div className="admin-sidebar-badge">
               PX
             </div>
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <span className="admin-sidebar-title">Use Peixoto</span>
               <span className="admin-sidebar-subtitle">Painel Master</span>
             </div>
+            {/* Fechar no mobile */}
+            <button
+              type="button"
+              className="admin-mobile-close-btn"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Fechar menu"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
 
           {/* Menus Verticais */}
           <nav className="admin-sidebar-nav">
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'dashboard' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">dashboard</span>
@@ -346,7 +364,7 @@ export default function AdminPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('financeiro')}
+              onClick={() => { setActiveTab('financeiro'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'financeiro' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">payments</span>
@@ -354,7 +372,7 @@ export default function AdminPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('produtos')}
+              onClick={() => { setActiveTab('produtos'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'produtos' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">diamond</span>
@@ -362,7 +380,7 @@ export default function AdminPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('gastos')}
+              onClick={() => { setActiveTab('gastos'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'gastos' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">trending_down</span>
@@ -370,7 +388,7 @@ export default function AdminPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('pedidos')}
+              onClick={() => { setActiveTab('pedidos'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'pedidos' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">shopping_bag</span>
@@ -378,7 +396,7 @@ export default function AdminPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('configuracoes')}
+              onClick={() => { setActiveTab('configuracoes'); setMobileMenuOpen(false); }}
               className={`admin-sidebar-link ${activeTab === 'configuracoes' ? 'active' : ''}`}
             >
               <span className="material-symbols-outlined">settings</span>
@@ -415,33 +433,43 @@ export default function AdminPage() {
       <div className="admin-main-container">
         {/* Topbar Superior */}
         <header className="admin-topbar">
-          <div>
-            <h1 className="admin-topbar-title">
-              {activeTab === 'dashboard' && 'Dashboard de Performance'}
-              {activeTab === 'financeiro' && 'Demonstrativo de Lucros (DRE)'}
-              {activeTab === 'produtos' && 'Gestão de Joias & Estoque'}
-              {activeTab === 'gastos' && 'Controle de Custos & Despesas'}
-              {activeTab === 'pedidos' && 'Atendimento de Pedidos WhatsApp'}
-              {activeTab === 'configuracoes' && 'Configurações da Loja'}
-            </h1>
-            <p className="admin-topbar-subtitle">
-              {activeTab === 'dashboard' && 'Visão executiva em tempo real de faturamento, margem e estoque'}
-              {activeTab === 'financeiro' && 'Estrutura detalhada de receita bruta, CMV, despesas e lucro líquido'}
-              {activeTab === 'produtos' && 'Catálogo, preços de custo/venda e movimentações de inventário'}
-              {activeTab === 'gastos' && 'Lançamento e controle de despesas operacionais da marca'}
-              {activeTab === 'pedidos' && 'Acompanhamento do funil de conversão de sacolas via WhatsApp'}
-              {activeTab === 'configuracoes' && 'Controle total dos canais de atendimento e dados da marca'}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <button
+              type="button"
+              className="admin-mobile-toggle-btn"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Abrir menu lateral"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <div>
+              <h1 className="admin-topbar-title">
+                {activeTab === 'dashboard' && 'Dashboard de Performance'}
+                {activeTab === 'financeiro' && 'Demonstrativo de Lucros (DRE)'}
+                {activeTab === 'produtos' && 'Gestão de Joias & Estoque'}
+                {activeTab === 'gastos' && 'Controle de Custos & Despesas'}
+                {activeTab === 'pedidos' && 'Atendimento de Pedidos WhatsApp'}
+                {activeTab === 'configuracoes' && 'Configurações da Loja'}
+              </h1>
+              <p className="admin-topbar-subtitle">
+                {activeTab === 'dashboard' && 'Visão executiva em tempo real de faturamento, margem e estoque'}
+                {activeTab === 'financeiro' && 'Estrutura detalhada de receita bruta, CMV, despesas e lucro líquido'}
+                {activeTab === 'produtos' && 'Catálogo, preços de custo/venda e movimentações de inventário'}
+                {activeTab === 'gastos' && 'Lançamento e controle de despesas operacionais da marca'}
+                {activeTab === 'pedidos' && 'Acompanhamento do funil de conversão de sacolas via WhatsApp'}
+                {activeTab === 'configuracoes' && 'Controle total dos canais de atendimento e dados da marca'}
+              </p>
+            </div>
           </div>
 
           <div className="admin-topbar-actions">
             <button onClick={loadAllData} className="admin-topbar-btn" title="Atualizar dados">
               <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>refresh</span>
-              Atualizar
+              <span className="btn-label-desktop">Atualizar</span>
             </button>
             <a href="/" target="_blank" className="admin-topbar-btn" title="Ver catálogo público">
               <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>storefront</span>
-              Ver Loja Pública ↗
+              <span className="btn-label-desktop">Ver Loja ↗</span>
             </a>
           </div>
         </header>
@@ -528,7 +556,7 @@ export default function AdminPage() {
                   </div>
 
                   {/* Resumos de Estoque & Pedidos */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+                  <div className="admin-two-cols-grid">
                     <div className="admin-card-section" style={{ margin: 0 }}>
                       <div className="admin-card-section-header">
                         <h3 className="admin-card-section-title">Controle de Estoque & Inventário</h3>
@@ -667,7 +695,7 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginTop: '1.5rem' }}>
+                  <div className="admin-two-cols-grid" style={{ marginTop: '1.5rem' }}>
                     <div className="admin-card-section" style={{ margin: 0 }}>
                       <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, marginBottom: '0.5rem' }}>
                         Margem Líquida da Operação
