@@ -125,7 +125,7 @@ export default function Header() {
             {/* Sacola Lateral */}
             <button
               type="button"
-              className="ref-cart-btn"
+              className={`ref-cart-btn ${totalItems === 0 ? 'ref-cart-btn-empty' : ''}`}
               onClick={() => setIsOpen(true)}
               aria-label="Visualizar sacola de pedidos"
               title="Minha Sacola"
@@ -145,14 +145,14 @@ export default function Header() {
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
-              <div className="ref-cart-info">
-                <span className="ref-cart-value">
-                  R$ {totalPrice > 0 ? totalPrice.toFixed(2).replace('.', ',') : '0,00'}
-                </span>
-                {totalItems > 0 && (
+              {totalItems > 0 && (
+                <div className="ref-cart-info">
+                  <span className="ref-cart-value">
+                    R$ {totalPrice.toFixed(2).replace('.', ',')}
+                  </span>
                   <span className="ref-cart-badge">{totalItems}</span>
-                )}
-              </div>
+                </div>
+              )}
             </button>
           </div>
         </div>
