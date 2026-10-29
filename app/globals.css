@@ -6,26 +6,38 @@
    ======================================================== */
 :root {
   /* Tons Principais Solicitados pelo Usuário */
-  --soft-pink: #ffd6e0;             /* Rosa mais clarinho e delicado para cabeçalho/elementos */
-  --soft-pink-dark: #f8b4c4;        /* Rosa sutilmente mais escuro para bordas/hover */
-  --soft-pink-light: #fff3f6;       /* Rosa bem suave de fundo para avisos/pílulas */
+  --slate-blue: #5B6E9A;            /* AZUL SLATE: Cor principal de textos, ícones e contrastes */
+  --rose: #F6D3D0;                  /* ROSÉ: Barra superior, cabeçalho, pílulas e rodapé */
+  --off-white: #FAF7F3;             /* OFF-WHITE: Fundo geral suave do site */
   
-  --brand-navy: #1f2d4d;            /* Azul escuro nobre da marca para letras e contrastes */
-  --brand-navy-light: #2d3f66;      /* Azul ligeiramente mais suave para links/textos */
-  --brand-navy-deep: #162038;       /* Azul ultra escuro para barra de direitos autorais */
+  --rose-dark: #eaaba6;             /* Rosé sutilmente mais escuro para bordas e hover */
+  --rose-light: #fdf5f4;            /* Rosé extra claro para fundos secundários */
+  
+  --slate-blue-dark: #465578;       /* Azul Slate mais profundo para rodapé final e hover */
+  --slate-blue-light: #778ab5;      /* Azul Slate mais suave para detalhes sutis */
 
   /* Aliases do Sistema */
-  --ref-pink: var(--soft-pink);
-  --ref-pink-dark: var(--soft-pink-dark);
-  --ref-pink-light: var(--soft-pink-light);
-  --ref-pink-badge: var(--soft-pink);
+  --soft-pink: var(--rose);
+  --soft-pink-dark: var(--rose-dark);
+  --soft-pink-light: var(--rose-light);
+  --soft-pink-badge: var(--rose);
+
+  --brand-navy: var(--slate-blue);
+  --brand-navy-light: var(--slate-blue-light);
+  --brand-navy-deep: var(--slate-blue-dark);
+
+  --ref-pink: var(--rose);
+  --ref-pink-dark: var(--rose-dark);
+  --ref-pink-light: var(--rose-light);
+  --ref-pink-badge: var(--rose);
 
   --ref-white: #ffffff;
-  --ref-dark: #1f2d4d;              /* Textos principais em azul escuro */
-  --ref-gray-text: #55627a;
-  --ref-gray-light: #8894a8;
-  --ref-gray-bg: #f9fafe;
-  --ref-border: #e8ecf4;
+  --ref-off-white: var(--off-white);
+  --ref-dark: var(--slate-blue);    /* Textos principais em azul slate */
+  --ref-gray-text: #667594;
+  --ref-gray-light: #9aa7be;
+  --ref-gray-bg: var(--off-white);
+  --ref-border: #eddcd9;
   --ref-whatsapp: #25d366;
   --ref-font: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --max-width: 1180px;
@@ -39,7 +51,7 @@
 
 html {
   font-family: var(--ref-font);
-  background-color: var(--ref-white);
+  background-color: var(--ref-off-white);
   color: var(--ref-dark);
   -webkit-font-smoothing: antialiased;
 }
@@ -48,7 +60,7 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: var(--ref-white);
+  background-color: var(--ref-off-white);
 }
 
 a {
@@ -70,12 +82,13 @@ button {
 
 /* ========================================================
    1. TOP BAR (FAIXA SUPERIOR ESTREITA)
+   FUNDO ROSÉ COM LETRAS NO AZUL SLATE
    ======================================================== */
 .ref-top-bar {
-  background-color: var(--ref-white);
-  border-bottom: 1px solid var(--soft-pink-dark);
+  background-color: var(--rose);
+  border-bottom: 1px solid var(--rose-dark);
   font-size: 0.72rem;
-  color: var(--ref-gray-text);
+  color: var(--slate-blue);
   padding: 0.4rem 0;
 }
 
@@ -508,12 +521,12 @@ button {
    ======================================================== */
 .ref-banner-section {
   padding: 1.5rem 0 1rem;
-  background-color: var(--ref-white);
+  background-color: transparent;
 }
 
 .ref-banner-card {
   position: relative;
-  background-color: #fafbfd;
+  background-color: var(--ref-white);
   border: 1px solid var(--ref-border);
   border-radius: 6px;
   display: flex;
@@ -887,7 +900,7 @@ button {
    ======================================================== */
 .ref-newsletter-section {
   padding: 3rem 0;
-  background-color: var(--ref-white);
+  background-color: transparent;
   border-top: 1px solid var(--ref-border);
 }
 
