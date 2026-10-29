@@ -41,6 +41,11 @@ interface ProductItem {
   cost_price?: number;
   stock_quantity: number;
   published: number;
+  category_name?: string;
+  materials?: string;
+  image?: string;
+  primary_image?: string;
+  first_image?: string;
 }
 
 interface ExpenseItem {
@@ -74,16 +79,19 @@ export default function AdminPage() {
   // Dados
   const [dashData, setDashData] = useState<DashboardData | null>(null);
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [productSearch, setProductSearch] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [settings, setSettings] = useState<Record<string, string>>({});
 
   // Modais e formulários
   const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Novo produto
+  // Novo/Edição de produto de Semijoia
   const [prodForm, setProdForm] = useState({
     name: '',
     sku: '',
@@ -91,6 +99,8 @@ export default function AdminPage() {
     cost_price: '',
     category_id: '1',
     stock_quantity: '1',
+    materials: 'Banho Ouro 18k (10 milésimos)',
+    image_url: '',
     description: '',
     published: true,
   });
@@ -185,41 +195,95 @@ export default function AdminPage() {
     router.push('/admin/login');
   };
 
+  const openCreateProduct = () => {
+    setEditingProduct(null);
+    setProdForm({
+      name: '',
+      sku: `PX-${Date.now().toString().slice(-4)}`,
+      price: '',
+      cost_price: '',
+      category_id: '1',
+      stock_quantity: '1',
+      materials: 'Banho Ouro 18k (10 milésimos)',
+      image_url: '',
+      description: '',
+      published: true
+    });
+    setShowProductModal(true);
+  };
+
+  const openEditProduct = (prod: ProductItem) => {
+    setEditingProduct(prod);
+    setProdForm({
+      name: prod.name,
+      sku: prod.sku,
+      price: prod.price?.toString() || '',
+      cost_price: prod.cost_price?.toString() || '',
+      category_id: '1',
+      stock_quantity: prod.stock_quantity?.toString() || '0',
+      materials: prod.materials || 'Banho Ouro 18k (10 milésimos)',
+      image_url: prod.image || prod.primary_image || prod.first_image || '',
+      description: '',
+      published: prod.published === 1
+    });
+    setShowProductModal(true);
+  };
+
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
+      const isEdit = !!editingProduct;
+      const url = isEdit ? `/api/products/${editingProduct.id}` : '/api/products';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const bodyData: Record<string, unknown> = {
+        name: prodForm.name,
+        sku: prodForm.sku || `PX-${Date.now().toString().slice(-4)}`,
+        price: parseFloat(prodForm.price) || 0,
+        cost_price: parseFloat(prodForm.cost_price) || 0,
+        category_id: parseInt(prodForm.category_id) || 1,
+        stock_quantity: parseInt(prodForm.stock_quantity) || 0,
+        materials: prodForm.materials,
+        description: prodForm.description,
+        published: prodForm.published ? 1 : 0
+      };
+
+      if (prodForm.image_url.trim()) {
+        bodyData.images = [{ url: prodForm.image_url.trim(), alt: prodForm.name }];
+      }
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: prodForm.name,
-          sku: prodForm.sku || `PX-${Date.now().toString().slice(-4)}`,
-          price: parseFloat(prodForm.price) || 0,
-          cost_price: parseFloat(prodForm.cost_price) || 0,
-          category_id: parseInt(prodForm.category_id) || 1,
-          stock_quantity: parseInt(prodForm.stock_quantity) || 0,
-          description: prodForm.description,
-          published: prodForm.published ? 1 : 0
-        })
+        body: JSON.stringify(bodyData)
       });
 
-      if (!res.ok) throw new Error('Erro ao salvar produto');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Erro ao salvar semijoia');
+      }
 
-      showToast('Produto cadastrado com sucesso!');
+      showToast(isEdit ? 'Semijoia atualizada com sucesso!' : 'Semijoia cadastrada com sucesso!');
       setShowProductModal(false);
-      setProdForm({
-        name: '',
-        sku: '',
-        price: '',
-        cost_price: '',
-        category_id: '1',
-        stock_quantity: '1',
-        description: '',
-        published: true
-      });
+      setEditingProduct(null);
       loadAllData();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Erro ao salvar', 'error');
+    }
+  };
+
+  const handleDeleteProduct = async (id: number, name: string) => {
+    if (!confirm(`Tem certeza que deseja excluir/arquivar a peça "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showToast('Peça removida com sucesso!');
+        loadAllData();
+      } else {
+        throw new Error('Falha ao remover produto');
+      }
+    } catch {
+      showToast('Erro ao excluir semijoia', 'error');
     }
   };
 
@@ -333,14 +397,18 @@ export default function AdminPage() {
       {/* ========================================================= */}
       <aside className={`admin-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div>
-          {/* Logo & Marca */}
+          {/* Logo & Marca Oficial Use Peixoto */}
           <div className="admin-sidebar-brand">
             <div className="admin-sidebar-badge">
-              PX
+              <img
+                src="/logo.png"
+                alt="Logo Use Peixoto"
+                style={{ height: '26px', width: 'auto', objectFit: 'contain' }}
+              />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <span className="admin-sidebar-title">Use Peixoto</span>
-              <span className="admin-sidebar-subtitle">Painel Master</span>
+              <span className="admin-sidebar-subtitle">Painel de Semijoias</span>
             </div>
             {/* Fechar no mobile */}
             <button
@@ -724,68 +792,176 @@ export default function AdminPage() {
               )}
 
               {/* ------------------------------------------------------------- */}
-              {/* 3. ABA PRODUTOS & CONTROLE DE ESTOQUE                         */}
+              {/* 3. ABA PRODUTOS & CONTROLE DE ESTOQUE (SEMIJOIAS USE PEIXOTO)  */}
               {/* ------------------------------------------------------------- */}
-              {activeTab === 'produtos' && (
-                <div>
-                  <div className="admin-card-section">
-                    <div className="admin-card-section-header">
-                      <h3 className="admin-card-section-title">Estoque de Semijoias ({products.length} itens)</h3>
-                      <button onClick={() => setShowProductModal(true)} className="zom-btn-primary">
-                        <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>add</span>
-                        Nova Semijoia
-                      </button>
-                    </div>
+              {activeTab === 'produtos' && (() => {
+                const filteredProducts = products.filter(p => {
+                  const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                    p.sku.toLowerCase().includes(productSearch.toLowerCase()) ||
+                    (p.materials && p.materials.toLowerCase().includes(productSearch.toLowerCase()));
+                  const matchesCat = selectedCategoryFilter === 'all' || p.category_name?.toLowerCase() === selectedCategoryFilter.toLowerCase();
+                  return matchesSearch && matchesCat;
+                });
 
-                    <table className="admin-zom-table">
-                      <thead>
-                        <tr>
-                          <th>Peça</th>
-                          <th>SKU</th>
-                          <th>Preço Venda</th>
-                          <th>Custo</th>
-                          <th>Estoque</th>
-                          <th>Vitrine</th>
-                          <th>Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {products.map(p => (
-                          <tr key={p.id}>
-                            <td><strong>{p.name}</strong></td>
-                            <td><code>{p.sku}</code></td>
-                            <td><strong>{fmtCurrency(p.price)}</strong></td>
-                            <td><span style={{ color: '#64748b' }}>{fmtCurrency(p.cost_price)}</span></td>
-                            <td>
-                              <span className={`zom-badge ${p.stock_quantity <= 2 ? 'zom-badge-red' : 'zom-badge-green'}`}>
-                                {p.stock_quantity} un
-                              </span>
-                            </td>
-                            <td>
-                              <button
-                                onClick={() => togglePublish(p.id, p.published)}
-                                className={`zom-badge ${p.published ? 'zom-badge-green' : 'zom-badge-gray'}`}
-                                style={{ border: 'none', cursor: 'pointer' }}
-                              >
-                                {p.published ? '✓ No Ar' : 'Oculto'}
-                              </button>
-                            </td>
-                            <td>
-                              <a
-                                href={`/produtos/${p.id}`}
-                                target="_blank"
-                                className="admin-link-btn"
-                              >
-                                Ver na Loja ↗
-                              </a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                return (
+                  <div>
+                    <div className="admin-card-section">
+                      <div className="admin-card-section-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                          <h3 className="admin-card-section-title">Estoque de Semijoias ({products.length} peças cadastradas)</h3>
+                          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
+                            Gerencie detalhes do banho, pedras, estoques mínimos e precificação.
+                          </p>
+                        </div>
+                        <button onClick={openCreateProduct} className="zom-btn-primary">
+                          <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>diamond</span>
+                          Nova Semijoia
+                        </button>
+                      </div>
+
+                      {/* Barra de Filtros e Busca Rápida */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1.4rem', alignItems: 'center' }}>
+                        <div style={{ flex: '1 1 240px', position: 'relative' }}>
+                          <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '1.15rem' }}>
+                            search
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Buscar por nome, SKU ou banho (ex: ouro 18k)..."
+                            value={productSearch}
+                            onChange={e => setProductSearch(e.target.value)}
+                            className="zom-input"
+                            style={{ paddingLeft: '2.5rem', width: '100%' }}
+                          />
+                        </div>
+                        <div style={{ flex: '0 0 auto' }}>
+                          <select
+                            value={selectedCategoryFilter}
+                            onChange={e => setSelectedCategoryFilter(e.target.value)}
+                            className="zom-input"
+                            style={{ width: 'auto', padding: '0.85rem 1rem' }}
+                          >
+                            <option value="all">Todas as Categorias</option>
+                            <option value="brincos">Brincos</option>
+                            <option value="colares">Colares</option>
+                            <option value="aneis">Anéis</option>
+                            <option value="pulseiras">Pulseiras</option>
+                            <option value="conjuntos">Conjuntos</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="admin-table-responsive">
+                        <table className="admin-zom-table">
+                          <thead>
+                            <tr>
+                              <th>Peça & Banho</th>
+                              <th>SKU</th>
+                              <th>Preço Venda</th>
+                              <th>Preço Custo</th>
+                              <th>Lucro Unitário</th>
+                              <th>Estoque</th>
+                              <th>Vitrine</th>
+                              <th style={{ textAlign: 'right' }}>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredProducts.map(p => {
+                              const thumb = p.image || p.primary_image || p.first_image || '/images/products/brinco-gota.jpg';
+                              const profitUnit = (p.price || 0) - (p.cost_price || 0);
+                              const isGold = (p.materials || '').toLowerCase().includes('ouro');
+                              const isSilver = (p.materials || '').toLowerCase().includes('prata');
+                              const isRose = (p.materials || '').toLowerCase().includes('ros');
+
+                              return (
+                                <tr key={p.id}>
+                                  <td>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                      <img
+                                        src={thumb}
+                                        alt={p.name}
+                                        className="admin-thumb"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).src = '/logo.png';
+                                        }}
+                                      />
+                                      <div>
+                                        <strong style={{ display: 'block', color: '#1a2234', fontSize: '0.85rem' }}>
+                                          {p.name}
+                                        </strong>
+                                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', alignItems: 'center' }}>
+                                          {p.materials && (
+                                            <span className={`zom-badge ${
+                                              isGold ? 'zom-badge-gold' :
+                                              isSilver ? 'zom-badge-silver' :
+                                              isRose ? 'zom-badge-rose' : 'zom-badge-gray'
+                                            }`} style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }}>
+                                              {p.materials}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td><code>{p.sku}</code></td>
+                                  <td><strong style={{ color: '#1a2234' }}>{fmtCurrency(p.price)}</strong></td>
+                                  <td><span style={{ color: '#64748b' }}>{fmtCurrency(p.cost_price)}</span></td>
+                                  <td>
+                                    <strong style={{ color: profitUnit > 0 ? '#059669' : '#e11d48', fontSize: '0.8rem' }}>
+                                      {profitUnit > 0 ? `+ ${fmtCurrency(profitUnit)}` : fmtCurrency(profitUnit)}
+                                    </strong>
+                                  </td>
+                                  <td>
+                                    <span className={`zom-badge ${p.stock_quantity <= 2 ? 'zom-badge-red' : 'zom-badge-green'}`}>
+                                      {p.stock_quantity} un
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <button
+                                      onClick={() => togglePublish(p.id, p.published)}
+                                      className={`zom-badge ${p.published ? 'zom-badge-green' : 'zom-badge-gray'}`}
+                                      style={{ border: 'none', cursor: 'pointer' }}
+                                      title="Clique para alternar visibilidade no site"
+                                    >
+                                      {p.published ? '✓ Visível' : 'Oculto'}
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                                      <a
+                                        href={`/produtos/${p.id}`}
+                                        target="_blank"
+                                        className="admin-btn-sm admin-btn-action-view"
+                                        title="Ver produto na loja"
+                                      >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>visibility</span>
+                                      </a>
+                                      <button
+                                        onClick={() => openEditProduct(p)}
+                                        className="admin-btn-sm admin-btn-action-edit"
+                                        title="Editar semijoia"
+                                      >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteProduct(p.id, p.name)}
+                                        className="admin-btn-sm admin-btn-action-delete"
+                                        title="Remover semijoia"
+                                      >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>delete</span>
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* ------------------------------------------------------------- */}
               {/* 4. ABA CONTROLE DE GASTOS                                     */}
@@ -980,17 +1156,22 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {/* MODAL: NOVO PRODUTO */}
+      {/* MODAL: NOVO / EDITAR PRODUTO (USE PEIXOTO SEMIJOIAS) */}
       {showProductModal && (
         <div className="admin-modal-overlay" onClick={() => setShowProductModal(false)}>
-          <div className="admin-modal" style={{ borderRadius: '24px' }} onClick={e => e.stopPropagation()}>
+          <div className="admin-modal" style={{ borderRadius: '24px', maxWidth: '620px' }} onClick={e => e.stopPropagation()}>
             <div className="admin-modal-header">
-              <h3>Cadastrar Nova Semijoia</h3>
+              <div>
+                <h3 style={{ margin: 0 }}>{editingProduct ? 'Editar Semijoia' : 'Cadastrar Nova Semijoia'}</h3>
+                <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                  {editingProduct ? `Editando código ${editingProduct.sku}` : 'Adicione uma nova peça ao catálogo oficial'}
+                </span>
+              </div>
               <button onClick={() => setShowProductModal(false)} className="admin-modal-close">✕</button>
             </div>
             <form onSubmit={handleSaveProduct} className="admin-form">
               <div className="zom-input-group">
-                <label className="zom-input-label">Nome da Peça *</label>
+                <label className="zom-input-label">Nome da Semijoia *</label>
                 <input
                   type="text"
                   required
@@ -999,6 +1180,36 @@ export default function AdminPage() {
                   onChange={e => setProdForm({ ...prodForm, name: e.target.value })}
                   className="zom-input"
                 />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.8rem' }}>
+                <div className="zom-input-group">
+                  <label className="zom-input-label">Banho / Acabamento</label>
+                  <select
+                    value={prodForm.materials}
+                    onChange={e => setProdForm({ ...prodForm, materials: e.target.value })}
+                    className="zom-input"
+                  >
+                    <option value="Banho Ouro 18k (10 milésimos)">Banho Ouro 18k (10 milésimos)</option>
+                    <option value="Banho Ouro 18k (5 milésimos)">Banho Ouro 18k (5 milésimos)</option>
+                    <option value="Prata 925 com Verniz Suíço">Prata 925 com Verniz Suíço</option>
+                    <option value="Banho Ródio Branco">Banho Ródio Branco</option>
+                    <option value="Banho Ródio Negro">Banho Ródio Negro</option>
+                    <option value="Banho Rosé Gold">Banho Rosé Gold</option>
+                    <option value="Hipoalergênico & Níquel Free">Hipoalergênico & Níquel Free</option>
+                  </select>
+                </div>
+
+                <div className="zom-input-group">
+                  <label className="zom-input-label">SKU / Referência</label>
+                  <input
+                    type="text"
+                    placeholder="PX-0001"
+                    value={prodForm.sku}
+                    onChange={e => setProdForm({ ...prodForm, sku: e.target.value })}
+                    className="zom-input"
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
@@ -1030,7 +1241,7 @@ export default function AdminPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
                 <div className="zom-input-group">
-                  <label className="zom-input-label">Estoque Inicial</label>
+                  <label className="zom-input-label">Estoque Disponível</label>
                   <input
                     type="number"
                     min="0"
@@ -1056,9 +1267,34 @@ export default function AdminPage() {
               </div>
 
               <div className="zom-input-group">
-                <label className="zom-input-label">Descrição da Joia</label>
+                <label className="zom-input-label">URL da Foto da Semijoia</label>
+                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="/images/products/brinco-gota.jpg ou link externo"
+                    value={prodForm.image_url}
+                    onChange={e => setProdForm({ ...prodForm, image_url: e.target.value })}
+                    className="zom-input"
+                    style={{ flex: 1 }}
+                  />
+                  {prodForm.image_url.trim() && (
+                    <img
+                      src={prodForm.image_url}
+                      alt="Prévia"
+                      className="admin-thumb"
+                      onError={e => {
+                        (e.target as HTMLImageElement).src = '/logo.png';
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="zom-input-group">
+                <label className="zom-input-label">Descrição / Detalhes de Garantia</label>
                 <textarea
                   rows={2}
+                  placeholder="Ex: Peça hipoalergênica, acompanha certificado de garantia de 6 meses..."
                   value={prodForm.description}
                   onChange={e => setProdForm({ ...prodForm, description: e.target.value })}
                   className="zom-input"
@@ -1070,7 +1306,7 @@ export default function AdminPage() {
                   Cancelar
                 </button>
                 <button type="submit" className="zom-btn-primary">
-                  Cadastrar Peça
+                  {editingProduct ? 'Salvar Alterações' : 'Cadastrar Semijoia'}
                 </button>
               </div>
             </form>
@@ -1119,11 +1355,14 @@ export default function AdminPage() {
                     onChange={e => setExpenseForm({ ...expenseForm, category: e.target.value })}
                     className="zom-input"
                   >
-                    <option value="Embalagens">Embalagens & Envio</option>
-                    <option value="Marketing">Marketing / Tráfego Pago</option>
-                    <option value="Fornecedor">Fornecedor / Banho</option>
-                    <option value="Ferramentas">Ferramentas & Softwares</option>
-                    <option value="Geral">Outros / Geral</option>
+                    <option value="Galvânica & Banho de Ouro">Galvânica & Banho de Ouro (Fornecedor)</option>
+                    <option value="Pedrarias & Zircônias">Pedrarias & Zircônias</option>
+                    <option value="Embalagens & Sacolas">Embalagens, Caixas & Sacolas de Luxo</option>
+                    <option value="Fotos & Produção">Fotos, Modelos & Conteúdo</option>
+                    <option value="Marketing & Tráfego">Marketing & Anúncios (Instagram/Google)</option>
+                    <option value="Fretes & Entregas">Fretes & Taxas de Envio</option>
+                    <option value="Sistemas & Taxas">Sistemas, Maquininha & Taxas</option>
+                    <option value="Outros">Outros / Gastos Gerais</option>
                   </select>
                 </div>
               </div>

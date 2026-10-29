@@ -290,6 +290,8 @@ function initializeSchema(db: Database.Database) {
         sku: 'PX-BRI-001',
         category_id: brincosCat?.id ?? null,
         price: 149.90,
+        cost_price: 45.00,
+        materials: 'Banho Ouro 18k (10 milésimos)',
         promo_price: null,
         stock_quantity: 12,
         image_url: '/images/products/brinco-gota.jpg'
@@ -301,6 +303,8 @@ function initializeSchema(db: Database.Database) {
         sku: 'PX-COL-002',
         category_id: colaresCat?.id ?? null,
         price: 149.90,
+        cost_price: 48.00,
+        materials: 'Banho Ouro 18k (10 milésimos)',
         promo_price: null,
         stock_quantity: 15,
         image_url: '/images/products/colar-ponto-de-luz.jpg'
@@ -312,6 +316,8 @@ function initializeSchema(db: Database.Database) {
         sku: 'PX-ANE-003',
         category_id: aneisCat?.id ?? null,
         price: 54.90,
+        cost_price: 18.00,
+        materials: 'Banho Ródio Branco com micro zircônias',
         promo_price: null,
         stock_quantity: 20,
         image_url: '/images/products/anel-solitario.jpg'
@@ -323,6 +329,8 @@ function initializeSchema(db: Database.Database) {
         sku: 'PX-PUL-004',
         category_id: pulseirasCat?.id ?? null,
         price: 89.90,
+        cost_price: 28.00,
+        materials: 'Banho Prata 925 com zircônias',
         promo_price: null,
         stock_quantity: 8,
         image_url: '/images/products/pulseira-riviera.jpg'
@@ -330,8 +338,8 @@ function initializeSchema(db: Database.Database) {
     ];
 
     const insertProd = db.prepare(`
-      INSERT INTO products (name, slug, description, sku, category_id, price, promo_price, stock_quantity, published, featured, is_new, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 1, ?)
+      INSERT INTO products (name, slug, description, sku, category_id, price, cost_price, materials, promo_price, stock_quantity, published, featured, is_new, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, 1, ?)
     `);
     const insertImg = db.prepare(`
       INSERT INTO product_images (product_id, url, alt, sort_order, is_primary)
@@ -342,7 +350,7 @@ function initializeSchema(db: Database.Database) {
       let sort = 1;
       for (const p of initialProducts) {
         const res = insertProd.run(
-          p.name, p.slug, p.description, p.sku, p.category_id, p.price, p.promo_price, p.stock_quantity, sort++
+          p.name, p.slug, p.description, p.sku, p.category_id, p.price, p.cost_price || 35.0, p.materials || 'Banho Ouro 18k hipoalergênico', p.promo_price, p.stock_quantity, sort++
         );
         const productId = res.lastInsertRowid;
         insertImg.run(productId, p.image_url, p.name);
