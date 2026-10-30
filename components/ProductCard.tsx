@@ -70,24 +70,6 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         )}
       </Link>
 
-      {/* Color Dots */}
-      <div className="ref-color-dots">
-        <button
-          type="button"
-          onClick={() => setSelectedColor('ouro')}
-          className={`ref-color-dot dot-ouro ${selectedColor === 'ouro' ? 'active' : ''}`}
-          title="Banho Ouro 18k"
-          aria-label="Ouro 18k"
-        />
-        <button
-          type="button"
-          onClick={() => setSelectedColor('prata')}
-          className={`ref-color-dot dot-prata ${selectedColor === 'prata' ? 'active' : ''}`}
-          title="Prata 925"
-          aria-label="Prata 925"
-        />
-      </div>
-
       {/* Product Details */}
       <div className="ref-product-body">
         <h3 className="ref-product-name">

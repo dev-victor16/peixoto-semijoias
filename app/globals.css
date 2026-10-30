@@ -6,7 +6,7 @@
    ======================================================== */
 :root {
   /* Tons Principais Baseados na Logo */
-  --slate-blue: #546894;            /* AZUL SLATE DA LOGO: Cor de fundo dominante nos blocos principais */
+  --slate-blue: #566b98;            /* AZUL SLATE EXATO DA LOGO (RGB 86, 107, 152) */
   --slate-blue-dark: #3f5177;       /* Azul Slate mais profundo para contrastes e bordas */
   --slate-blue-light: #6a7ea8;      /* Azul Slate mais claro para hover */
   
@@ -131,19 +131,20 @@ button {
 .ref-header {
   background-color: var(--slate-blue);
   width: 100%;
-  padding: 1.1rem 0;
+  padding: 0.85rem 0;
   box-shadow: 0 4px 18px rgba(31, 45, 77, 0.15);
   border-bottom: 1px solid rgba(246, 211, 208, 0.25);
+  position: relative;
 }
 
 .ref-header-container {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1rem;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: space-between;
+  position: relative;
 }
 
 /* LADO ESQUERDO: Botão de Menu com Efeito Hover Invertido */
@@ -151,13 +152,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex: 1;
+  z-index: 2;
 }
 
 .ref-menu-trigger-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(246, 211, 208, 0.4);
   border-radius: 8px;
-  padding: 0.55rem 0.95rem;
+  padding: 0.5rem 0.85rem;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -195,12 +198,18 @@ button {
   letter-spacing: 0.08em;
 }
 
-/* CENTRO: Logo Oficial Centralizada Sem Bordas e Perfeitamente Uniforme */
+/* CENTRO: Logo Oficial 100% Centralizada no Cabeçalho */
 .ref-header-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .ref-header-logo-center {
@@ -209,25 +218,23 @@ button {
   justify-content: center;
   text-decoration: none;
   background: transparent;
-  padding: 0.2rem 0.5rem;
 }
 
 .ref-header-logo-img {
-  height: 64px;
-  width: auto;
-  max-width: 260px;
-  object-fit: contain;
+  height: 72px;
+  width: 72px;
+  object-fit: cover;
   border: none;
   border-radius: 0;
   background: transparent;
   display: block;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
-  transition: transform 0.25s ease, filter 0.25s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transition: transform 0.25s ease;
 }
 
 .ref-header-logo-img:hover {
-  transform: scale(1.06);
-  filter: drop-shadow(0 4px 16px rgba(246, 211, 208, 0.4));
+  transform: scale(1.05);
 }
 
 /* LADO DIREITO: Lupinha e Sacola */
@@ -236,6 +243,8 @@ button {
   align-items: center;
   justify-content: flex-end;
   gap: 0.85rem;
+  flex: 1;
+  z-index: 2;
 }
 
 /* Lupinha com Efeito Invertido no Hover */
@@ -1623,8 +1632,8 @@ button {
     font-size: 1.35rem;
   }
   .ref-header-logo-img {
-    height: 46px;
-    max-width: 180px;
+    height: 52px;
+    width: 52px;
   }
   .ref-cart-value {
     display: none;
@@ -2679,3 +2688,400 @@ button {
     opacity: 1;
   }
 }
+
+/* ========================================================
+   PÁGINA DE DETALHES DO PRODUTO (Design Refinado e Responsivo)
+   ======================================================== */
+.ref-product-detail-page {
+  padding: 2.5rem 0 4rem;
+  background-color: var(--ref-cream);
+  min-height: 80vh;
+}
+
+.ref-detail-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ref-gray-text);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.ref-detail-breadcrumb a {
+  color: var(--brand-navy);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ref-detail-breadcrumb a:hover {
+  color: var(--slate-blue);
+  text-decoration: underline;
+}
+
+.ref-detail-breadcrumb .separator {
+  color: #c4c4c4;
+}
+
+.ref-detail-breadcrumb .current {
+  color: var(--ref-gray-text);
+  font-weight: 500;
+}
+
+.ref-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+  align-items: flex-start;
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  margin-bottom: 3.5rem;
+}
+
+.ref-detail-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ref-detail-main-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #fdfdfd;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #f0eeeb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-detail-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.ref-detail-main-img:hover {
+  transform: scale(1.04);
+}
+
+.ref-detail-badge-promo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--brand-navy);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+}
+
+.ref-detail-thumbnails {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.ref-detail-thumb-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ref-detail-thumb-btn.active {
+  border-color: var(--brand-navy);
+  transform: scale(1.02);
+}
+
+.ref-detail-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ref-detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-detail-category-tag {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--slate-blue);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.ref-detail-title {
+  font-size: 1.85rem;
+  color: var(--brand-navy);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
+}
+
+.ref-detail-sku {
+  font-size: 0.82rem;
+  color: #888888;
+  margin-bottom: 1.5rem;
+}
+
+.ref-detail-sku span {
+  font-weight: 600;
+  color: var(--brand-navy);
+}
+
+.ref-detail-pricing-box {
+  padding: 1.25rem 0;
+  border-top: 1px solid #f0eeeb;
+  border-bottom: 1px solid #f0eeeb;
+  margin-bottom: 1.5rem;
+}
+
+.ref-detail-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.ref-detail-old-price {
+  font-size: 1.1rem;
+  color: #999999;
+  text-decoration: line-through;
+}
+
+.ref-detail-current-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+}
+
+.ref-detail-installment {
+  font-size: 0.95rem;
+  color: var(--ref-gray-text);
+  margin-top: 0.35rem;
+}
+
+.ref-detail-installment strong {
+  color: var(--brand-navy);
+}
+
+.ref-detail-seal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: #fdfaf8;
+  border: 1px solid #f4ece6;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.ref-detail-seal-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: var(--brand-navy);
+}
+
+.ref-detail-seal-item svg {
+  color: var(--slate-blue);
+  flex-shrink: 0;
+}
+
+.ref-detail-seal-item strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--brand-navy);
+}
+
+.ref-detail-seal-item span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ref-gray-text);
+}
+
+.ref-detail-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ref-detail-qty-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dcdad5;
+  border-radius: 6px;
+  background: #ffffff;
+  height: 48px;
+}
+
+.ref-qty-btn {
+  width: 38px;
+  height: 100%;
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--brand-navy);
+  transition: background-color 0.2s ease;
+}
+
+.ref-qty-btn:hover {
+  background-color: #f7f5f2;
+}
+
+.ref-qty-number {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--brand-navy);
+}
+
+.ref-detail-add-btn {
+  flex: 1;
+  height: 48px;
+  background: var(--brand-navy);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-detail-add-btn:hover {
+  background: var(--slate-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(86, 107, 152, 0.25);
+}
+
+.ref-detail-add-btn.added {
+  background: #10b981;
+}
+
+.ref-detail-cta-secondary {
+  margin-bottom: 2rem;
+}
+
+.ref-detail-whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  height: 48px;
+  background: #25D366;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.ref-detail-whatsapp-btn:hover {
+  background: #20bd5a;
+  transform: translateY(-1px);
+}
+
+.ref-detail-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-top: 1px solid #f0eeeb;
+  padding-top: 1.5rem;
+}
+
+.ref-detail-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ref-detail-block-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ref-detail-block-text {
+  font-size: 0.88rem;
+  color: var(--ref-gray-text);
+  line-height: 1.6;
+}
+
+.ref-related-section {
+  margin-top: 3.5rem;
+}
+
+.ref-related-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--brand-navy);
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.ref-related-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--brand-rose);
+  margin: 0.6rem auto 0;
+}
+
+@media (max-width: 900px) {
+  .ref-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+
+  .ref-detail-title {
+    font-size: 1.45rem;
+  }
+
+  .ref-detail-current-price {
+    font-size: 1.65rem;
+  }
+
+  .ref-detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ref-detail-qty-wrap {
+    justify-content: center;
+  }
+}
+

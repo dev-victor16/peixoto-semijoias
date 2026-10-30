@@ -33,11 +33,11 @@ export default function Header() {
           </div>
 
           <div className="ref-top-bar-center">
-            <span>Atendimento e Pedidos Exclusivos via WhatsApp • Enviamos para todo o Brasil</span>
+            <span>Semijoias com garantia • Banhado a prata 925 e antialérgica</span>
           </div>
 
           <div className="ref-top-bar-right">
-            <span>Garantia e Acabamento Premium</span>
+            <span>Atendimento Exclusivo via WhatsApp</span>
           </div>
         </div>
       </div>

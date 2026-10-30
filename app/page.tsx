@@ -2,7 +2,6 @@ import React from 'react';
 import { getDb } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
-import NewsletterForm from '@/components/NewsletterForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,17 +103,17 @@ export default async function HomePage() {
               {/* Center: Headline & Promotional Copy */}
               <div className="ref-banner-text-box">
                 <h1 className="ref-banner-title">
-                  <span className="ref-title-line1">Enviamos para</span>
-                  <span className="ref-title-badge">todo Brasil</span>
+                  <span className="ref-title-line1">Peixoto</span>
+                  <span className="ref-title-badge">Semi Joias</span>
                 </h1>
 
                 <div className="ref-banner-pill">
-                  Peças banhadas com garantia e acabamento refinado
+                  Semijoias com garantia, banhado a prata 925 e antialérgica
                 </div>
 
                 <div className="ref-banner-rates">
-                  <p className="rate-line">SEMI JOIAS COM GARANTIA • BANHO EM OURO 18K E PRATA 925</p>
-                  <p className="rate-sub">ATENDIMENTO E COMBINAÇÃO DE PEDIDOS PELO WHATSAPP</p>
+                  <p className="rate-line">SEMIJOIAS COM GARANTIA • BANHADO A PRATA 925 E ANTIALÉRGICA</p>
+                  <p className="rate-sub">ATENDIMENTO EXCLUSIVO E PEDIDOS PELO WHATSAPP</p>
                 </div>
               </div>
 
@@ -122,7 +121,7 @@ export default async function HomePage() {
               <div className="ref-banner-model-box">
                 <img
                   src="/images/banner/model-banner.jpg"
-                  alt="Peixoto Semi Joias - Enviamos para todo Brasil"
+                  alt="Peixoto Semi Joias - Semijoias banhado a prata 925 e antialérgica"
                   className="ref-banner-model-img"
                 />
               </div>
@@ -182,16 +181,7 @@ export default async function HomePage() {
       </section>
 
       {/* ========================================================
-          4. NEWSLETTER (Integrada ao banco de dados via componente funcional)
-          ======================================================== */}
-      <section className="ref-newsletter-section">
-        <div className="ref-container">
-          <NewsletterForm />
-        </div>
-      </section>
-
-      {/* ========================================================
-          5. FAIXA DE BENEFÍCIOS (Ícones SVG limpos e consistentes, sem emojis)
+          4. FAIXA DE BENEFÍCIOS (Ícones SVG limpos e consistentes, sem emojis)
           ======================================================== */}
       <section className="ref-benefits-section">
         <div className="ref-container">
@@ -209,14 +199,11 @@ export default async function HomePage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <rect x="1" y="3" width="15" height="13" />
-                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                  <circle cx="5.5" cy="18.5" r="2.5" />
-                  <circle cx="18.5" cy="18.5" r="2.5" />
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
-                <span className="ref-benefit-title">ENVIAMOS PARA TODO BRASIL</span>
+                <span className="ref-benefit-title">PEÇAS ANTIALÉRGICAS</span>
               </div>
-              <p className="ref-benefit-desc">Envio seguro com informações direto no WhatsApp</p>
+              <p className="ref-benefit-desc">Desenvolvidas com conforto e tecnologia para peles sensíveis</p>
             </div>
 
             <div className="ref-benefit-item">
@@ -232,11 +219,12 @@ export default async function HomePage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <circle cx="12" cy="8" r="7" />
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
                 </svg>
-                <span className="ref-benefit-title">GARANTIA DE QUALIDADE</span>
+                <span className="ref-benefit-title">BANHADO A PRATA 925</span>
               </div>
-              <p className="ref-benefit-desc">Semijoias com banho reforçado e acabamento fino</p>
+              <p className="ref-benefit-desc">Semijoias com garantia e banho nobre de alto padrão</p>
             </div>
 
             <div className="ref-benefit-item">
