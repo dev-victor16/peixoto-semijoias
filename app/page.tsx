@@ -102,6 +102,13 @@ export default async function HomePage() {
 
               {/* Center: Headline & Promotional Copy */}
               <div className="ref-banner-text-box">
+                <div className="ref-banner-fish-icon-wrap">
+                  <img
+                    src="/images/logo-peixinho.png"
+                    alt="Peixoto Semi Joias"
+                    className="ref-banner-fish-img"
+                  />
+                </div>
                 <h1 className="ref-banner-title">
                   <span className="ref-title-line1">Peixoto</span>
                   <span className="ref-title-badge">Semi Joias</span>
