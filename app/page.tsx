@@ -1,12 +1,53 @@
 import React from 'react';
 import { getDb } from '@/lib/db';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
 import NewsletterForm from '@/components/NewsletterForm';
 
 export const dynamic = 'force-dynamic';
 
-function getHomeProducts(): ProductCardData[] {
+async function getHomeProducts(): Promise<ProductCardData[]> {
   try {
+    // 1. Supabase first
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { data: supaProds, error } = await supabase
+        .from('products')
+        .select(`
+          id, name, slug, price, promo_price, is_promo, description, stock_quantity, sort_order,
+          categories (name, slug),
+          product_images (url, is_primary, sort_order)
+        `)
+        .eq('published', 1)
+        .order('sort_order', { ascending: true })
+        .order('id', { ascending: true })
+        .limit(8);
+
+      if (!error && supaProds) {
+        return supaProds.map(p => {
+          const imgs = (p.product_images as Array<{ url: string; is_primary: number; sort_order: number }>) || [];
+          const primaryImg = imgs.find(i => i.is_primary === 1)?.url;
+          const firstImg = imgs.sort((a, b) => a.sort_order - b.sort_order)[0]?.url;
+          const cat = Array.isArray(p.categories) ? p.categories[0] : (p.categories as { name: string; slug: string } | null);
+
+          return {
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            price: p.price,
+            promo_price: p.promo_price,
+            is_promo: p.is_promo,
+            short_description: p.description,
+            stock_quantity: p.stock_quantity,
+            category_name: cat?.name || '',
+            category_slug: cat?.slug || '',
+            image_url: primaryImg || firstImg || null
+          } as ProductCardData;
+        });
+      }
+    }
+
+    // 2. Fallback to SQLite
     const db = getDb();
     const products = db.prepare(`
       SELECT 
@@ -27,8 +68,8 @@ function getHomeProducts(): ProductCardData[] {
   }
 }
 
-export default function HomePage() {
-  const products = getHomeProducts();
+export default async function HomePage() {
+  const products = await getHomeProducts();
 
   return (
     <div className="ref-home-page">
