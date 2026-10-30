@@ -2606,5 +2606,43 @@ button {
   z-index: 2;
 }
 
+/* Toast Notificação Flutuante Luxo */
+.admin-toast {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 99999;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 90vw;
+}
 
+.admin-toast-success {
+  background-color: #1a2234;
+  color: #F6D3D0;
+  border: 1px solid rgba(246, 211, 208, 0.3);
+}
 
+.admin-toast-error {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: 1px solid #dc2626;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}

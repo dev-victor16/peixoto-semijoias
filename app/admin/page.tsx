@@ -147,8 +147,8 @@ export default function AdminPage() {
       });
   }, []);
 
-  const loadAllData = async () => {
-    setLoading(true);
+  const loadAllData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [dashRes, prodRes, expRes, ordRes, setRes] = await Promise.all([
         fetch('/api/dashboard'),
@@ -186,7 +186,7 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -307,7 +307,7 @@ export default function AdminPage() {
       showToast(isEdit ? 'Semijoia atualizada com sucesso!' : 'Semijoia cadastrada com sucesso!');
       setShowProductModal(false);
       setEditingProduct(null);
-      loadAllData();
+      loadAllData(true);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Erro ao salvar', 'error');
     }
@@ -318,8 +318,9 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
+        setProducts(prev => prev.filter(p => p.id !== id));
         showToast('Peça removida com sucesso!');
-        loadAllData();
+        loadAllData(true);
       } else {
         throw new Error('Falha ao remover produto');
       }
@@ -363,7 +364,7 @@ export default function AdminPage() {
         expense_date: new Date().toISOString().slice(0, 10),
         notes: ''
       });
-      loadAllData();
+      loadAllData(true);
     } catch {
       showToast('Erro ao registrar', 'error');
     }
@@ -374,8 +375,9 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/expenses?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
+        setExpenses(prev => prev.filter(e => e.id !== id));
         showToast('Despesa excluída!');
-        loadAllData();
+        loadAllData(true);
       }
     } catch {
       showToast('Erro ao excluir', 'error');
@@ -572,7 +574,7 @@ export default function AdminPage() {
           </div>
 
           <div className="admin-topbar-actions">
-            <button onClick={loadAllData} className="admin-topbar-btn" title="Atualizar dados">
+            <button onClick={() => loadAllData()} className="admin-topbar-btn" title="Atualizar dados">
               <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>refresh</span>
               <span className="btn-label-desktop">Atualizar</span>
             </button>

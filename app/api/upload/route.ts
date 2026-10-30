@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,13 +29,31 @@ export async function POST(request: NextRequest) {
 
     const ext = path.extname(file.name) || '.jpg';
     const filename = `${uuidv4()}${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // 1. Supabase Storage first (Permanent across all Render restarts and devices)
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { data, error } = await supabase.storage
+        .from('products')
+        .upload(filename, buffer, {
+          contentType: file.type,
+          upsert: true
+        });
+
+      if (!error && data) {
+        const { data: pubData } = supabase.storage.from('products').getPublicUrl(filename);
+        return NextResponse.json({ url: pubData.publicUrl, filename });
+      }
+      console.error('Supabase storage upload error:', error);
+    }
+
+    // 2. Fallback to local disk
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     const filepath = path.join(uploadDir, filename);
     fs.writeFileSync(filepath, buffer);
 
