@@ -1,12 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { requireAuth, logAdminAction } from '@/lib/auth';
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+
+    // 1. Supabase first
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const isNum = !isNaN(Number(id));
+      let query = supabase.from('orders').select(`
+        *,
+        order_items (*),
+        order_status_history (*)
+      `);
+      if (isNum) query = query.or(`id.eq.${id},order_number.eq.${id}`);
+      else query = query.eq('order_number', id);
+
+      const { data: order, error } = await query.maybeSingle();
+      if (!error && order) {
+        return NextResponse.json({
+          ...order,
+          items: order.order_items || [],
+          history: order.order_status_history || []
+        });
+      }
+    }
+
+    // 2. Fallback to SQLite
     const db = getDb();
-    
     const order = db.prepare('SELECT * FROM orders WHERE id = ? OR order_number = ?').get(id, id) as Record<string, unknown> | undefined;
     if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
     
@@ -25,15 +49,97 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const body = await request.json();
     const { status, admin_notes, customer_name, customer_phone } = body;
-    
-    const db = getDb();
-    const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as Record<string, unknown> | undefined;
-    if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
 
     const validStatuses = [
       'aguardando_contato', 'em_atendimento', 'aguardando_confirmacao',
       'confirmado', 'em_preparacao', 'concluido', 'cancelado'
     ];
+
+    // 1. Supabase first
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { data: order, error: ordErr } = await supabase.from('orders').select('*').eq('id', id).single();
+      if (ordErr || !order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
+
+      if (status && status !== order.status) {
+        if (!validStatuses.includes(status)) throw new Error('Status inválido');
+
+        const { data: items } = await supabase.from('order_items').select('*').eq('order_id', order.id);
+
+        // Confirming: deduct stock
+        if (status === 'confirmado' && order.status !== 'confirmado' && items) {
+          for (const item of items) {
+            const { data: product } = await supabase.from('products').select('*').eq('id', item.product_id).single();
+            if (product) {
+              const newQty = product.stock_quantity - item.quantity;
+              if (newQty < 0) {
+                throw new Error(`Estoque insuficiente para "${item.product_name}". Disponível: ${product.stock_quantity}`);
+              }
+              await supabase.from('products').update({ stock_quantity: newQty, updated_at: new Date().toISOString() }).eq('id', item.product_id);
+              await supabase.from('stock_movements').insert({
+                product_id: item.product_id,
+                type: 'saida',
+                quantity: item.quantity,
+                previous_quantity: product.stock_quantity,
+                new_quantity: newQty,
+                reason: `Pedido ${order.order_number} confirmado`,
+                reference_type: 'order',
+                reference_id: order.id,
+                created_by: user.username
+              });
+            }
+          }
+        }
+
+        // Canceling confirmed: restore stock
+        if (status === 'cancelado' && ['confirmado', 'em_preparacao'].includes(order.status) && items) {
+          for (const item of items) {
+            const { data: product } = await supabase.from('products').select('*').eq('id', item.product_id).single();
+            if (product) {
+              const newQty = product.stock_quantity + item.quantity;
+              await supabase.from('products').update({ stock_quantity: newQty, updated_at: new Date().toISOString() }).eq('id', item.product_id);
+              await supabase.from('stock_movements').insert({
+                product_id: item.product_id,
+                type: 'entrada',
+                quantity: item.quantity,
+                previous_quantity: product.stock_quantity,
+                new_quantity: newQty,
+                reason: `Pedido ${order.order_number} cancelado - estorno`,
+                reference_type: 'order',
+                reference_id: order.id,
+                created_by: user.username
+              });
+            }
+          }
+        }
+
+        await supabase.from('order_status_history').insert({
+          order_id: Number(id),
+          old_status: order.status,
+          new_status: status,
+          changed_by: user.username,
+          notes: admin_notes || null
+        });
+      }
+
+      const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (status !== undefined) updateData.status = status;
+      if (admin_notes !== undefined) updateData.admin_notes = admin_notes;
+      if (customer_name !== undefined) updateData.customer_name = customer_name;
+      if (customer_phone !== undefined) updateData.customer_phone = customer_phone;
+
+      const { data: updated } = await supabase.from('orders').update(updateData).eq('id', id).select('*').single();
+      const { data: updatedItems } = await supabase.from('order_items').select('*').eq('order_id', id);
+      const { data: updatedHist } = await supabase.from('order_status_history').select('*').eq('order_id', id).order('created_at', { ascending: true });
+
+      logAdminAction(user.userId, user.username, 'update_order', 'order', Number(id), `Status: ${status || order.status}`);
+      return NextResponse.json({ ...updated, items: updatedItems || [], history: updatedHist || [] });
+    }
+
+    // 2. Fallback to SQLite
+    const db = getDb();
+    const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
 
     const updateOrder = db.transaction(() => {
       if (status && status !== order.status) {
@@ -41,10 +147,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           throw new Error('Status inválido');
         }
 
-        // Stock logic for status changes
         const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id) as Record<string, unknown>[];
         
-        // When confirming: deduct stock
         if (status === 'confirmado' && order.status !== 'confirmado') {
           for (const item of items) {
             const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id) as Record<string, unknown>;
@@ -62,7 +166,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           }
         }
 
-        // When canceling a confirmed order: restore stock
         if (status === 'cancelado' && ['confirmado', 'em_preparacao'].includes(order.status as string)) {
           for (const item of items) {
             const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id) as Record<string, unknown>;

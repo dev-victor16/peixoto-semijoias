@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb, slugify } from '@/lib/db';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { requireAuth, logAdminAction } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const db = getDb();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -20,6 +20,67 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0', 10);
     const admin = searchParams.get('admin') === '1';
 
+    // 1. Try Supabase first if configured
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      let query = supabase
+        .from('products')
+        .select(`
+          *,
+          categories (id, name, slug),
+          product_images (url, is_primary, sort_order)
+        `, { count: 'exact' });
+
+      if (!admin) {
+        query = query.eq('published', 1);
+      } else if (published !== null) {
+        query = query.eq('published', parseInt(published));
+      }
+
+      if (search) {
+        query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,materials.ilike.%${search}%`);
+      }
+      if (featured === '1') query = query.eq('featured', 1);
+      if (isNew === '1') query = query.eq('is_new', 1);
+      if (minPrice) query = query.gte('price', parseFloat(minPrice));
+      if (maxPrice) query = query.lte('price', parseFloat(maxPrice));
+      if (inStock === '1') query = query.gt('stock_quantity', 0);
+
+      switch (sort) {
+        case 'price_asc': query = query.order('price', { ascending: true }); break;
+        case 'price_desc': query = query.order('price', { ascending: false }); break;
+        case 'name': query = query.order('name', { ascending: true }); break;
+        case 'oldest': query = query.order('created_at', { ascending: true }); break;
+        default: query = query.order('created_at', { ascending: false });
+      }
+
+      query = query.range(offset, offset + limit - 1);
+
+      const { data: supaProds, error: supaErr, count } = await query;
+      if (!supaErr && supaProds) {
+        const processed = supaProds.map((p) => {
+          const imgs = (p.product_images as Array<{ url: string; is_primary: number; sort_order: number }>) || [];
+          const primaryImg = imgs.find(i => i.is_primary === 1)?.url;
+          const firstImg = imgs.sort((a, b) => a.sort_order - b.sort_order)[0]?.url;
+          const cat = p.categories as { id: number; name: string; slug: string } | null;
+
+          return {
+            ...p,
+            category_name: cat?.name || null,
+            category_slug: cat?.slug || null,
+            primary_image: primaryImg || firstImg || null,
+            first_image: firstImg || primaryImg || null,
+            image: primaryImg || firstImg || null,
+            effective_price: p.promo_price || p.price
+          };
+        });
+
+        return NextResponse.json({ products: processed, total: count || processed.length, limit, offset });
+      }
+    }
+
+    // 2. Fallback to SQLite
+    const db = getDb();
     let query = `
       SELECT p.*, c.name as category_name, c.slug as category_slug,
         (SELECT url FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = 1 LIMIT 1) as primary_image,
@@ -73,7 +134,6 @@ export async function GET(request: NextRequest) {
 
     const products = db.prepare(query).all(...params) as Record<string, unknown>[];
     
-    // Get current active promo prices
     const now = new Date().toISOString();
     const processedProducts = products.map((p) => {
       const hasActivePromo = p.is_promo && p.promo_price &&
@@ -108,11 +168,77 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nome, SKU e preço são obrigatórios' }, { status: 400 });
     }
 
-    const db = getDb();
     let slug = slugify(name);
-    const existingSlug = db.prepare('SELECT id FROM products WHERE slug = ?').get(slug);
-    if (existingSlug) slug = `${slug}-${Date.now()}`;
 
+    // 1. If Supabase configured, save to Supabase
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { data: existingSku } = await supabase.from('products').select('id').eq('sku', sku).maybeSingle();
+      if (existingSku) {
+        return NextResponse.json({ error: 'SKU já existe' }, { status: 409 });
+      }
+
+      const { data: newProd, error: insertErr } = await supabase
+        .from('products')
+        .insert({
+          name,
+          slug: `${slug}-${Date.now().toString().slice(-4)}`,
+          description: description || null,
+          sku,
+          category_id: category_id || null,
+          price,
+          promo_price: promo_price || null,
+          promo_start: promo_start || null,
+          promo_end: promo_end || null,
+          cost_price: cost_price || null,
+          stock_quantity: stock_quantity || 0,
+          low_stock_threshold: low_stock_threshold || 3,
+          materials: materials || null,
+          care_instructions: care_instructions || null,
+          weight: weight || null,
+          dimensions: dimensions || null,
+          published: published !== undefined ? (published ? 1 : 0) : 1,
+          featured: featured ? 1 : 0,
+          is_new: is_new ? 1 : 0,
+          is_promo: is_promo ? 1 : 0
+        })
+        .select('*')
+        .single();
+
+      if (insertErr || !newProd) {
+        console.error('Supabase insert error:', insertErr);
+        throw new Error(insertErr?.message || 'Erro ao inserir no Supabase');
+      }
+
+      if (images && images.length > 0) {
+        const imgRows = images.map((img: { url: string; alt?: string }, idx: number) => ({
+          product_id: newProd.id,
+          url: img.url,
+          alt: img.alt || name,
+          sort_order: idx,
+          is_primary: idx === 0 ? 1 : 0
+        }));
+        await supabase.from('product_images').insert(imgRows);
+      }
+
+      if (variations && variations.length > 0) {
+        const varRows = variations.map((v: { type: string; value: string; price_adjustment?: number; stock_quantity?: number; sku_suffix?: string }) => ({
+          product_id: newProd.id,
+          type: v.type,
+          value: v.value,
+          price_adjustment: v.price_adjustment || 0,
+          stock_quantity: v.stock_quantity || 0,
+          sku_suffix: v.sku_suffix || null
+        }));
+        await supabase.from('product_variations').insert(varRows);
+      }
+
+      logAdminAction(user.userId, user.username, 'create_product', 'product', newProd.id, name);
+      return NextResponse.json(newProd, { status: 201 });
+    }
+
+    // 2. Fallback to SQLite
+    const db = getDb();
     const existingSku = db.prepare('SELECT id FROM products WHERE sku = ?').get(sku);
     if (existingSku) {
       return NextResponse.json({ error: 'SKU já existe' }, { status: 409 });
