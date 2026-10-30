@@ -2,20 +2,20 @@
 
 /* ========================================================
    CSS RESET & VARIABLES
-   NOVA PALETA: ROSA MAIS CLARINHO COM LETRAS E DETALHES EM AZUL ESCURO
+   NOVA IDENTIDADE VISUAL: AZUL SLATE DOMINANTE COM LETRAS E DETALHES EM ROSÉ (FIEL À LOGO)
    ======================================================== */
 :root {
-  /* Tons Principais Solicitados pelo Usuário */
-  --slate-blue: #5B6E9A;            /* AZUL SLATE: Cor principal de textos, ícones e contrastes */
-  --rose: #F6D3D0;                  /* ROSÉ: Barra superior, cabeçalho, pílulas e rodapé */
-  --off-white: #FAF7F3;             /* OFF-WHITE: Fundo geral suave do site */
+  /* Tons Principais Baseados na Logo */
+  --slate-blue: #546894;            /* AZUL SLATE DA LOGO: Cor de fundo dominante nos blocos principais */
+  --slate-blue-dark: #3f5177;       /* Azul Slate mais profundo para contrastes e bordas */
+  --slate-blue-light: #6a7ea8;      /* Azul Slate mais claro para hover */
   
-  --rose-dark: #eaaba6;             /* Rosé sutilmente mais escuro para bordas e hover */
-  --rose-light: #fdf5f4;            /* Rosé extra claro para fundos secundários */
+  --rose: #F6D3D0;                  /* ROSÉ DA LOGO: Letras principais, detalhes e tipografia de luxo */
+  --rose-dark: #e8b6b2;             /* Rosé ligeiramente mais encorpado para hover e bordas */
+  --rose-light: #fff2f0;            /* Rosé extra claro para fundos sutis */
   
-  --slate-blue-dark: #465578;       /* Azul Slate mais profundo para rodapé final e hover */
-  --slate-blue-light: #778ab5;      /* Azul Slate mais suave para detalhes sutis */
-
+  --off-white: #FAF7F3;             /* OFF-WHITE: Fundo geral de leitura suave do site */
+  
   /* Aliases do Sistema */
   --soft-pink: var(--rose);
   --soft-pink-dark: var(--rose-dark);
@@ -33,11 +33,11 @@
 
   --ref-white: #ffffff;
   --ref-off-white: var(--off-white);
-  --ref-dark: var(--slate-blue);    /* Textos principais em azul slate */
-  --ref-gray-text: #667594;
+  --ref-dark: var(--slate-blue-dark);
+  --ref-gray-text: #607194;
   --ref-gray-light: #9aa7be;
   --ref-gray-bg: var(--off-white);
-  --ref-border: #eddcd9;
+  --ref-border: #dbe3f0;
   --ref-whatsapp: #25d366;
   --ref-font: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --max-width: 1180px;
@@ -82,14 +82,14 @@ button {
 
 /* ========================================================
    1. TOP BAR (FAIXA SUPERIOR ESTREITA)
-   FUNDO ROSÉ COM LETRAS NO AZUL SLATE
+   FUNDO AZUL SLATE COM LETRAS NO ROSÉ
    ======================================================== */
 .ref-top-bar {
-  background-color: var(--rose);
-  border-bottom: 1px solid var(--rose-dark);
+  background-color: var(--slate-blue-dark);
+  border-bottom: 1px solid rgba(246, 211, 208, 0.2);
   font-size: 0.72rem;
-  color: var(--slate-blue);
-  padding: 0.4rem 0;
+  color: var(--rose);
+  padding: 0.45rem 0;
 }
 
 .ref-top-bar-container {
@@ -106,35 +106,34 @@ button {
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
+  color: var(--rose);
 }
 
 .ref-top-bar-sep {
-  color: #ddd;
+  color: rgba(246, 211, 208, 0.4);
 }
 
 .ref-top-bar-center {
   font-weight: 600;
-  color: var(--brand-navy);
+  color: var(--rose);
   letter-spacing: 0.03em;
   text-align: center;
 }
 
 .ref-top-bar-right {
   font-weight: 600;
-  color: var(--brand-navy);
+  color: var(--rose);
 }
 
 /* ========================================================
-   2. HEADER REORGANIZADO
-   ESQUERDA: MENU 3 BARRAS | CENTRO: LOGO | DIREITA: BUSCA + SACOLA
-   FUNDO: ROSA MAIS CLARINHO | LETRAS: AZUL MAIS ESCURO
+   2. HEADER PRINCIPAL (AZUL SLATE DA LOGO COM LETRAS E DETALHES EM ROSÉ)
    ======================================================== */
 .ref-header {
-  background-color: var(--soft-pink);
+  background-color: var(--slate-blue);
   width: 100%;
-  padding: 0.85rem 0;
-  box-shadow: 0 2px 10px rgba(31, 45, 77, 0.06);
-  border-bottom: 1px solid var(--soft-pink-dark);
+  padding: 1rem 0;
+  box-shadow: 0 4px 18px rgba(31, 45, 77, 0.15);
+  border-bottom: 1px solid rgba(246, 211, 208, 0.25);
 }
 
 .ref-header-container {
@@ -147,7 +146,7 @@ button {
   gap: 1rem;
 }
 
-/* LADO ESQUERDO: Botão de 3 barrinhas para abrir menu */
+/* LADO ESQUERDO: Botão de Menu com Efeito Hover Invertido */
 .ref-header-left {
   display: flex;
   align-items: center;
@@ -155,19 +154,23 @@ button {
 }
 
 .ref-menu-trigger-btn {
-  background: transparent;
-  border: 1px solid var(--soft-pink-dark);
-  border-radius: 4px;
-  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(246, 211, 208, 0.4);
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  color: var(--brand-navy);
-  transition: all 0.2s ease;
+  color: var(--rose);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ref-menu-trigger-btn:hover {
-  background-color: rgba(31, 45, 77, 0.06);
+  background-color: var(--rose);
+  color: var(--slate-blue);
+  border-color: var(--rose);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .ref-menu-icon-bars {
@@ -182,7 +185,7 @@ button {
   display: block;
   height: 2.2px;
   width: 100%;
-  background-color: var(--brand-navy);
+  background-color: currentColor;
   border-radius: 2px;
 }
 
@@ -190,10 +193,9 @@ button {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--brand-navy);
 }
 
-/* CENTRO: Logo Oficial Centralizada */
+/* CENTRO: Logo Oficial Centralizada com Fundo Integrado */
 .ref-header-center {
   display: flex;
   align-items: center;
@@ -209,16 +211,17 @@ button {
 }
 
 .ref-header-logo-img {
-  height: 44px;
+  height: 52px;
   width: auto;
-  max-width: 170px;
+  max-width: 190px;
   object-fit: contain;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  border-radius: 8px;
+  transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .ref-header-logo-img:hover {
-  transform: scale(1.04);
-  opacity: 0.95;
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(246, 211, 208, 0.3));
 }
 
 /* LADO DIREITO: Lupinha e Sacola */
@@ -226,34 +229,36 @@ button {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
-/* Lupinha e Popover de Busca */
+/* Lupinha com Efeito Invertido no Hover */
 .ref-search-wrapper {
   position: relative;
 }
 
 .ref-search-toggle-btn {
-  background: var(--ref-white);
-  border: 1px solid var(--soft-pink-dark);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(246, 211, 208, 0.4);
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.05rem;
-  color: var(--brand-navy);
-  box-shadow: 0 1px 4px rgba(31, 45, 77, 0.08);
-  transition: all 0.2s ease;
+  color: var(--rose);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ref-search-toggle-btn:hover,
 .ref-search-toggle-btn.active {
-  background-color: var(--brand-navy);
-  color: var(--ref-white);
-  border-color: var(--brand-navy);
+  background-color: var(--rose);
+  color: var(--slate-blue);
+  border-color: var(--rose);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .ref-search-popover {
@@ -305,25 +310,25 @@ button {
   background-color: var(--brand-navy-light);
 }
 
-/* Botão da Sacola com Valores */
+/* Botão da Sacola com Valores - Efeito Invertido no Hover */
 .ref-cart-btn {
-  background: var(--ref-white);
-  border: 1px solid var(--soft-pink-dark);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(246, 211, 208, 0.4);
   border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  color: var(--brand-navy);
-  padding: 0.35rem 0.85rem;
-  min-height: 38px;
-  box-shadow: 0 1px 4px rgba(31, 45, 77, 0.08);
-  transition: all 0.2s ease;
+  gap: 0.55rem;
+  color: var(--rose);
+  padding: 0.4rem 1rem;
+  min-height: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ref-cart-btn.ref-cart-btn-empty {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 50%;
   display: inline-flex;
@@ -332,8 +337,11 @@ button {
 }
 
 .ref-cart-btn:hover {
-  border-color: var(--brand-navy);
-  transform: translateY(-1px);
+  background-color: var(--rose);
+  color: var(--slate-blue);
+  border-color: var(--rose);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .ref-cart-icon {
@@ -343,57 +351,65 @@ button {
 .ref-cart-info {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   position: relative;
 }
 
 .ref-cart-value {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: var(--brand-navy);
+  color: inherit;
   white-space: nowrap;
 }
 
 .ref-cart-badge {
-  background-color: var(--brand-navy);
-  color: var(--ref-white);
+  background-color: var(--rose);
+  color: var(--slate-blue-dark);
   font-size: 0.65rem;
-  font-weight: 700;
-  width: 19px;
-  height: 19px;
+  font-weight: 800;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.ref-cart-btn:hover .ref-cart-badge {
+  background-color: var(--slate-blue-dark);
+  color: var(--rose);
 }
 
 /* Sub-barra de categorias desktop */
 .ref-header-quick-nav {
   max-width: var(--max-width);
-  margin: 0.65rem auto 0;
-  padding: 0.35rem 1rem 0;
-  border-top: 1px solid rgba(31, 45, 77, 0.08);
+  margin: 0.75rem auto 0;
+  padding: 0.5rem 1rem 0;
+  border-top: 1px solid rgba(246, 211, 208, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.8rem;
+  gap: 2rem;
   flex-wrap: wrap;
 }
 
 .ref-header-quick-nav a {
-  color: var(--brand-navy);
-  font-size: 0.76rem;
+  color: var(--rose);
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.25s ease;
 }
 
 .ref-header-quick-nav a:hover,
 .ref-header-quick-nav a.active {
-  opacity: 0.75;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  background-color: rgba(246, 211, 208, 0.15);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 /* ========================================================
@@ -402,7 +418,7 @@ button {
 .ref-nav-drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15, 23, 42, 0.55);
   z-index: 210;
   animation: refFadeIn 0.2s ease;
 }
@@ -415,7 +431,7 @@ button {
   width: 100%;
   max-width: 340px;
   background-color: var(--ref-white);
-  box-shadow: 6px 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 6px 0 30px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   animation: refSlideInLeft 0.28s ease;
@@ -427,9 +443,9 @@ button {
 }
 
 .ref-nav-drawer-header {
-  padding: 1.2rem 1.4rem;
-  background-color: var(--soft-pink);
-  border-bottom: 1px solid var(--soft-pink-dark);
+  padding: 1.3rem 1.4rem;
+  background-color: var(--slate-blue);
+  border-bottom: 1px solid rgba(246, 211, 208, 0.25);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -438,19 +454,25 @@ button {
 .ref-nav-drawer-title {
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--brand-navy);
+  color: var(--rose);
   letter-spacing: 0.08em;
 }
 
 .ref-nav-drawer-close {
-  background: rgba(31, 45, 77, 0.08);
-  border: none;
-  width: 32px;
-  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(246, 211, 208, 0.3);
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  color: var(--brand-navy);
+  color: var(--rose);
   font-size: 1rem;
   font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.ref-nav-drawer-close:hover {
+  background-color: var(--rose);
+  color: var(--slate-blue);
 }
 
 .ref-drawer-search {
@@ -616,46 +638,48 @@ button {
 .ref-title-line1 {
   font-size: 2.1rem;
   font-weight: 800;
-  color: var(--brand-navy);
+  color: var(--slate-blue-dark);
   line-height: 1.2;
 }
 
 .ref-title-badge {
   display: inline-block;
-  background-color: var(--brand-navy);
-  color: var(--ref-white);
+  background-color: var(--slate-blue);
+  color: var(--rose);
   font-size: 2rem;
   font-weight: 700;
   font-style: italic;
-  padding: 0.15rem 1.4rem;
-  border-radius: 4px;
-  margin-top: 0.2rem;
+  padding: 0.2rem 1.6rem;
+  border-radius: 8px;
+  margin-top: 0.3rem;
+  box-shadow: 0 4px 12px rgba(84, 104, 148, 0.25);
 }
 
 .ref-banner-pill {
   display: inline-block;
-  background-color: var(--soft-pink);
-  color: var(--brand-navy);
+  background-color: var(--slate-blue);
+  color: var(--rose);
   font-size: 0.82rem;
   font-weight: 700;
-  padding: 0.35rem 1.2rem;
+  padding: 0.45rem 1.4rem;
   border-radius: 20px;
-  border: 1px solid var(--soft-pink-dark);
-  margin-bottom: 0.8rem;
+  border: 1px solid rgba(246, 211, 208, 0.3);
+  margin-bottom: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(84, 104, 148, 0.15);
 }
 
 .ref-banner-rates {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  color: var(--brand-navy);
+  color: var(--slate-blue-dark);
   line-height: 1.5;
   text-transform: uppercase;
 }
 
 .rate-line {
-  color: var(--brand-navy);
+  color: var(--slate-blue-dark);
 }
 
 .rate-sub {
@@ -671,8 +695,8 @@ button {
   overflow: hidden;
   flex-shrink: 0;
   background-color: var(--ref-white);
-  box-shadow: 0 4px 16px rgba(31, 45, 77, 0.12);
-  border: 3px solid var(--soft-pink);
+  box-shadow: 0 6px 20px rgba(84, 104, 148, 0.2);
+  border: 4px solid var(--rose);
 }
 
 .ref-banner-model-img {
@@ -887,33 +911,40 @@ button {
   margin-bottom: 0.8rem;
 }
 
-/* COMPRAR Button: Fundo Rosé com Texto em Azul Slate */
+/* COMPRAR Button: Fundo Azul Slate com Texto em Rosé e Efeito Invertido no Hover */
 .ref-product-btn {
-  background-color: var(--rose);
-  color: var(--slate-blue);
+  background-color: var(--slate-blue);
+  color: var(--rose);
   border: none;
   width: calc(100% + 1.6rem);
   margin-left: -0.8rem;
   margin-top: auto;
-  padding: 0.72rem 0;
-  font-size: 0.78rem;
+  padding: 0.82rem 0;
+  font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-top: 1px solid var(--rose-dark);
-  transition: all 0.2s ease;
+  border-top: 1px solid rgba(246, 211, 208, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ref-product-btn:hover {
-  background-color: var(--rose-dark);
+  background-color: var(--rose);
   color: var(--slate-blue-dark);
+  border-top-color: var(--rose-dark);
+  box-shadow: 0 -4px 16px rgba(246, 211, 208, 0.4);
 }
 
 /* ========================================================
    7. NEWSLETTER
    ======================================================== */
 .ref-newsletter-section {
-  padding: 3rem 0;
+  padding: 3.5rem 0;
   background-color: transparent;
   border-top: 1px solid var(--ref-border);
 }
@@ -925,9 +956,9 @@ button {
 }
 
 .ref-newsletter-title {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: var(--brand-navy);
+  color: var(--slate-blue-dark);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 0.35rem;
@@ -947,46 +978,54 @@ button {
 
 .ref-input {
   width: 100%;
-  padding: 0.65rem 1rem;
-  font-size: 0.82rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.84rem;
   border: 1px solid var(--ref-border);
-  border-radius: 4px;
+  border-radius: 8px;
   outline: none;
-  color: var(--brand-navy);
+  color: var(--slate-blue-dark);
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
 }
 
 .ref-input:focus {
-  border-color: var(--brand-navy);
+  border-color: var(--slate-blue);
+  box-shadow: 0 0 0 3px rgba(84, 104, 148, 0.15);
 }
 
 .ref-newsletter-btn {
-  background-color: var(--brand-navy);
-  color: var(--ref-white);
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 0.78rem;
-  font-weight: 700;
+  background-color: var(--slate-blue);
+  color: var(--rose);
+  border: 1px solid var(--slate-blue);
+  padding: 0.85rem 2.2rem;
+  font-size: 0.82rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: 4px;
+  border-radius: 8px;
   align-self: center;
-  min-width: 180px;
-  margin-top: 0.3rem;
-  transition: background-color 0.2s ease;
+  min-width: 200px;
+  margin-top: 0.4rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ref-newsletter-btn:hover {
-  background-color: var(--brand-navy-light);
+  background-color: var(--rose);
+  color: var(--slate-blue-dark);
+  border-color: var(--rose-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(246, 211, 208, 0.45);
 }
 
 /* ========================================================
-   8. FAIXA DE BENEFÍCIOS
+   8. FAIXA DE BENEFÍCIOS (AZUL SLATE PROFUNDO COM ROSÉ)
    ======================================================== */
 .ref-benefits-section {
-  padding: 2.2rem 0;
-  background-color: var(--soft-pink-light);
-  border-top: 1px solid var(--soft-pink-dark);
-  border-bottom: 1px solid var(--soft-pink-dark);
+  padding: 2.5rem 0;
+  background-color: #3b4d70;
+  border-top: 1px solid rgba(246, 211, 208, 0.2);
+  border-bottom: 1px solid rgba(246, 211, 208, 0.2);
 }
 
 .ref-benefits-grid {
@@ -1006,53 +1045,36 @@ button {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 
 .ref-benefit-svg {
-  color: var(--brand-navy);
+  color: var(--rose);
   flex-shrink: 0;
 }
 
 .ref-benefit-title {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   font-weight: 800;
-  color: var(--brand-navy);
+  color: var(--rose);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .ref-benefit-desc {
-  font-size: 0.75rem;
-  color: var(--ref-gray-text);
+  font-size: 0.78rem;
+  color: rgba(246, 211, 208, 0.85);
   font-weight: 500;
 }
 
-/* Newsletter feedback messages */
-.ref-newsletter-success {
-  background-color: #eaf7ed;
-  border: 1px solid #c2e5cb;
-  border-radius: 4px;
-  padding: 1rem;
-  color: #1b602f;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.ref-newsletter-error-msg {
-  color: #b3261e;
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
 /* ========================================================
-   9. FOOTER: ROSA CLARINHO COM LETRAS EM AZUL ESCURO
+   9. FOOTER: FUNDO AZUL SLATE DOMINANTE COM LETRAS E DETALHES EM ROSÉ
    ======================================================== */
 .ref-footer {
-  background-color: var(--soft-pink);
-  color: var(--brand-navy);
-  padding: 3rem 0 0;
-  border-top: 1px solid var(--soft-pink-dark);
+  background-color: var(--slate-blue);
+  color: var(--rose);
+  padding: 3.5rem 0 0;
+  border-top: 1px solid rgba(246, 211, 208, 0.25);
 }
 
 .ref-footer-container {
@@ -1069,81 +1091,86 @@ button {
 }
 
 .ref-footer-heading {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 1.1rem;
-  color: var(--brand-navy);
+  margin-bottom: 1.2rem;
+  color: #ffffff;
+  border-left: 3px solid var(--rose);
+  padding-left: 0.6rem;
 }
 
 .ref-footer-links {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.6rem;
 }
 
 .ref-footer-links a {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--brand-navy);
+  color: var(--rose);
   opacity: 0.9;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
+  display: inline-block;
 }
 
 .ref-footer-links a:hover {
   opacity: 1;
-  text-decoration: underline;
+  color: #ffffff;
+  transform: translateX(4px);
 }
 
 .ref-footer-text {
-  font-size: 0.76rem;
-  color: var(--brand-navy);
-  line-height: 1.5;
-  margin-bottom: 0.8rem;
-  opacity: 0.95;
+  font-size: 0.78rem;
+  color: var(--rose);
+  line-height: 1.6;
+  margin-bottom: 0.9rem;
+  opacity: 0.92;
 }
 
 .ref-catalog-badge {
   display: inline-block;
-  background-color: var(--ref-white);
-  color: var(--brand-navy);
-  font-size: 0.7rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--rose);
+  font-size: 0.72rem;
   font-weight: 800;
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--soft-pink-dark);
-  box-shadow: 0 1px 3px rgba(31, 45, 77, 0.06);
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid rgba(246, 211, 208, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .ref-footer-contact {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.78rem;
+  gap: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .ref-footer-contact li {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: var(--brand-navy);
+  gap: 0.65rem;
+  color: var(--rose);
   font-weight: 600;
 }
 
 .ref-contact-svg {
-  color: var(--brand-navy);
+  color: var(--rose);
   flex-shrink: 0;
 }
 
 /* Bottom Bar */
 .ref-footer-bottom {
-  background-color: var(--brand-navy);
-  padding: 0.9rem 0;
-  font-size: 0.72rem;
-  color: var(--ref-white);
+  background-color: var(--slate-blue-dark);
+  padding: 1rem 0;
+  font-size: 0.74rem;
+  color: rgba(246, 211, 208, 0.85);
+  border-top: 1px solid rgba(246, 211, 208, 0.15);
 }
 
 .ref-bottom-inner {
