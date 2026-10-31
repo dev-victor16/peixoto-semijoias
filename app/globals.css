@@ -2791,6 +2791,58 @@ button {
   letter-spacing: 0.05em;
   padding: 0.35rem 0.75rem;
   border-radius: 4px;
+  z-index: 2;
+}
+
+/* Botões de Navegação da Galeria / Setas para passar fotos */
+.ref-detail-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--slate-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ref-detail-nav-btn:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  color: var(--rose);
+}
+
+.ref-detail-nav-prev {
+  left: 1rem;
+}
+
+.ref-detail-nav-next {
+  right: 1rem;
+}
+
+.ref-detail-photo-counter {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(31, 45, 77, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  z-index: 2;
 }
 
 .ref-detail-thumbnails {

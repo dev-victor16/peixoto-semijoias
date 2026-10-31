@@ -32,12 +32,36 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const images = product.images.length > 0
     ? product.images
     : [{ id: 0, url: '/images/products/placeholder.jpg', alt: product.name, is_primary: 1, sort_order: 0 }];
 
   const currentImage = images[selectedImgIndex] || images[0];
+
+  const handlePrevImg = () => {
+    setSelectedImgIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImg = () => {
+    setSelectedImgIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 40) {
+      handleNextImg();
+    } else if (diff < -40) {
+      handlePrevImg();
+    }
+    setTouchStartX(null);
+  };
 
   const effectivePrice = product.promo_price && product.promo_price < product.price
     ? product.promo_price
@@ -70,13 +94,17 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const whatsappMessage = encodeURIComponent(
     `Olá! Tenho interesse na peça *${product.name}* (Ref: ${product.sku}) no valor de R$ ${effectivePrice.toFixed(2).replace('.', ',')}. Está disponível?`
   );
-  const whatsappUrl = `https://wa.me/5511999999999?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/5531995779163?text=${whatsappMessage}`;
 
   return (
     <div className="ref-detail-grid">
-      {/* 1. Galeria de Imagens */}
+      {/* 1. Galeria de Imagens com Suporte a Slide / Carrossel */}
       <div className="ref-detail-gallery">
-        <div className="ref-detail-main-image-wrap">
+        <div 
+          className="ref-detail-main-image-wrap"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <img
             src={currentImage.url}
             alt={currentImage.alt || product.name}
@@ -84,6 +112,39 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           />
           {product.is_promo === 1 && product.promo_price && (
             <span className="ref-detail-badge-promo">PROMOÇÃO</span>
+          )}
+
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="ref-detail-nav-btn ref-detail-nav-prev"
+                onClick={handlePrevImg}
+                aria-label="Foto anterior"
+                title="Foto anterior"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                className="ref-detail-nav-btn ref-detail-nav-next"
+                onClick={handleNextImg}
+                aria-label="Próxima foto"
+                title="Próxima foto"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+
+              {/* Indicador de fotos (ex: 1 / 3) */}
+              <div className="ref-detail-photo-counter">
+                {selectedImgIndex + 1} / {images.length}
+              </div>
+            </>
           )}
         </div>
 
