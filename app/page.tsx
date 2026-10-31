@@ -2,6 +2,7 @@ import React from 'react';
 import { getDb } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
+import MobileBannerCarousel from '@/components/MobileBannerCarousel';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,10 +73,13 @@ export default async function HomePage() {
 
   return (
     <div className="ref-home-page">
+      {/* Banner Carrossel Mobile Exclusivo (logo abaixo da barra superior) */}
+      <MobileBannerCarousel />
+
       {/* ========================================================
-          1. HERO BANNER PRINCIPAL (Fiel à referência, sem exageros publicitários)
+          1. HERO BANNER PRINCIPAL (Exibido apenas na versão Desktop)
           ======================================================== */}
-      <section className="ref-banner-section">
+      <section className="ref-banner-section ref-desktop-banner">
         <div className="ref-container">
           <div className="ref-banner-card">
             {/* Left Carousel Arrow */}
