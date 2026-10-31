@@ -68,8 +68,6 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     ? product.promo_price
     : product.price;
 
-  const installment2x = (effectivePrice / 2).toFixed(2).replace('.', ',');
-
   const handleAddToCart = () => {
     setStockError(null);
     const result = addItem({
@@ -194,10 +192,6 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               R$ {product.price.toFixed(2).replace('.', ',')}
             </div>
           )}
-
-          <div className="ref-detail-installment">
-            em até <strong>2x de R$ {installment2x}</strong> sem juros
-          </div>
         </div>
 
         {/* Destaque Exclusivo: Prata 925 e Antialérgica */}

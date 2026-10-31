@@ -26,8 +26,6 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
     ? product.promo_price
     : product.price;
 
-  const installmentValue = (effectivePrice / 2).toFixed(2).replace('.', ',');
-
   const handleBuy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -84,10 +82,6 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
 
         <div className="ref-product-price">
           R$ {effectivePrice.toFixed(2).replace('.', ',')}
-        </div>
-
-        <div className="ref-product-installments">
-          2x de R$ {installmentValue} sem juros
         </div>
 
         {/* COMPRAR Button */}
