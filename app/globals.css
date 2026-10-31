@@ -212,9 +212,9 @@ button {
 }
 
 .ref-header-logo-img {
-  height: 52px;
+  height: 58px;
   width: auto;
-  max-width: 210px;
+  max-width: 240px;
   object-fit: contain;
   border: none;
   border-radius: 0;
@@ -1641,9 +1641,9 @@ button {
     font-size: 1.35rem;
   }
   .ref-header-logo-img {
-    height: 42px;
+    height: 46px;
     width: auto;
-    max-width: 160px;
+    max-width: 190px;
   }
   .ref-cart-value {
     display: none;
