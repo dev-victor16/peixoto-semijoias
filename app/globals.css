@@ -3377,3 +3377,66 @@ button {
   }
 }
 
+/* ========================================================
+   ADMIN TOGGLE SWITCH (ON / OFF)
+   ======================================================== */
+.admin-toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  width: 58px;
+  height: 28px;
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  transition: background-color 0.25s ease, box-shadow 0.2s ease;
+  user-select: none;
+  outline: none;
+}
+
+.admin-toggle-switch:hover {
+  opacity: 0.92;
+}
+
+.admin-toggle-switch:focus-visible {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
+}
+
+.admin-toggle-switch.active {
+  background-color: #10b981; /* Verde esmeralda vivo */
+}
+
+.admin-toggle-slider {
+  width: 22px;
+  height: 22px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+}
+
+.admin-toggle-switch.active .admin-toggle-slider {
+  transform: translateX(30px);
+}
+
+.admin-toggle-text {
+  position: absolute;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.admin-toggle-switch .admin-toggle-text {
+  right: 7px;
+}
+
+.admin-toggle-switch.active .admin-toggle-text {
+  left: 7px;
+  right: auto;
+}
+

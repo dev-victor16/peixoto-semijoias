@@ -43,6 +43,7 @@ interface ProductItem {
   published: number;
   category_name?: string;
   materials?: string;
+  supplier?: string;
   image?: string;
   primary_image?: string;
   first_image?: string;
@@ -102,6 +103,7 @@ export default function AdminPage() {
     category_id: '1',
     stock_quantity: '1',
     materials: 'Banho a Prata 925 (Antialérgica)',
+    supplier: '',
     image_url: '',
     description: '',
     published: true,
@@ -209,6 +211,7 @@ export default function AdminPage() {
       category_id: '1',
       stock_quantity: '1',
       materials: 'Banho a Prata 925 (Antialérgica)',
+      supplier: '',
       image_url: '',
       description: '',
       published: true
@@ -226,6 +229,7 @@ export default function AdminPage() {
       category_id: '1',
       stock_quantity: prod.stock_quantity?.toString() || '0',
       materials: prod.materials || 'Banho a Prata 925 (Antialérgica)',
+      supplier: prod.supplier || '',
       image_url: prod.image || prod.primary_image || prod.first_image || '',
       description: '',
       published: prod.published === 1
@@ -287,6 +291,7 @@ export default function AdminPage() {
         category_id: parseInt(prodForm.category_id) || 1,
         stock_quantity: parseInt(prodForm.stock_quantity) || 0,
         materials: prodForm.materials,
+        supplier: prodForm.supplier.trim() || null,
         description: prodForm.description,
         published: prodForm.published ? 1 : 0
       };
@@ -971,7 +976,7 @@ export default function AdminPage() {
                               <th>Preço Custo</th>
                               <th>Lucro Unitário</th>
                               <th>Estoque</th>
-                              <th>Vitrine</th>
+                              <th>Ativo (ON/OFF)</th>
                               <th style={{ textAlign: 'right' }}>Ações</th>
                             </tr>
                           </thead>
@@ -999,10 +1004,15 @@ export default function AdminPage() {
                                         <strong style={{ display: 'block', color: '#1a2234', fontSize: '0.85rem' }}>
                                           {p.name}
                                         </strong>
-                                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                           <span className="zom-badge zom-badge-silver" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }}>
                                             Prata 925
                                           </span>
+                                          {p.supplier ? (
+                                            <span style={{ fontSize: '0.68rem', color: '#64748b', background: '#f1f5f9', padding: '0.1rem 0.45rem', borderRadius: '4px' }}>
+                                              Forn: {p.supplier}
+                                            </span>
+                                          ) : null}
                                         </div>
                                       </div>
                                     </div>
@@ -1022,24 +1032,18 @@ export default function AdminPage() {
                                   </td>
                                   <td>
                                     <button
+                                      type="button"
                                       onClick={() => togglePublish(p.id, p.published)}
-                                      className={`zom-badge ${p.published ? 'zom-badge-green' : 'zom-badge-gray'}`}
-                                      style={{ border: 'none', cursor: 'pointer' }}
-                                      title="Clique para alternar visibilidade no site"
+                                      className={`admin-toggle-switch ${p.published ? 'active' : ''}`}
+                                      title={p.published ? 'Peça visível no site (Clique para desativar)' : 'Peça oculta do site (Clique para ativar)'}
+                                      aria-label="Alternar ativação do produto"
                                     >
-                                      {p.published ? '✓ Visível' : 'Oculto'}
+                                      <span className="admin-toggle-slider" />
+                                      <span className="admin-toggle-text">{p.published ? 'ON' : 'OFF'}</span>
                                     </button>
                                   </td>
                                   <td>
                                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
-                                      <a
-                                        href={`/produtos/${p.id}`}
-                                        target="_blank"
-                                        className="admin-btn-sm admin-btn-action-view"
-                                        title="Ver produto na loja"
-                                      >
-                                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>visibility</span>
-                                      </a>
                                       <button
                                         onClick={() => openEditProduct(p)}
                                         className="admin-btn-sm admin-btn-action-edit"
@@ -1470,6 +1474,17 @@ export default function AdminPage() {
                       placeholder="PX-0001"
                       value={prodForm.sku}
                       onChange={e => setProdForm({ ...prodForm, sku: e.target.value })}
+                      className="zom-input"
+                    />
+                  </div>
+
+                  <div className="zom-input-group">
+                    <label className="zom-input-label">Fornecedor / Origem</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Joias do Brasil, Fornecedor SP..."
+                      value={prodForm.supplier}
+                      onChange={e => setProdForm({ ...prodForm, supplier: e.target.value })}
                       className="zom-input"
                     />
                   </div>

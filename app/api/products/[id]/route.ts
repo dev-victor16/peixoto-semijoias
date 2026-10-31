@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const {
       name, description, sku, category_id, price, promo_price, promo_start, promo_end,
       cost_price, stock_quantity, low_stock_threshold, materials, care_instructions,
-      weight, dimensions, published, featured, is_new, is_promo, images, variations
+      supplier, weight, dimensions, published, featured, is_new, is_promo, images, variations
     } = body;
 
     // 1. Supabase first
@@ -181,6 +181,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (low_stock_threshold !== undefined) updateData.low_stock_threshold = low_stock_threshold;
       if (materials !== undefined) updateData.materials = materials;
       if (care_instructions !== undefined) updateData.care_instructions = care_instructions;
+      if (supplier !== undefined) updateData.supplier = supplier;
       if (weight !== undefined) updateData.weight = weight;
       if (dimensions !== undefined) updateData.dimensions = dimensions;
       if (published !== undefined) updateData.published = published ? 1 : 0;
@@ -188,12 +189,25 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (is_new !== undefined) updateData.is_new = is_new ? 1 : 0;
       if (is_promo !== undefined) updateData.is_promo = is_promo ? 1 : 0;
 
-      const { data: updatedProd, error: updateErr } = await supabase
+      let { data: updatedProd, error: updateErr } = await supabase
         .from('products')
         .update(updateData)
         .eq('id', id)
         .select('*')
         .single();
+
+      // If supplier column does not exist on Supabase, retry without supplier
+      if (updateErr && (updateErr.message?.includes('supplier') || updateErr.code === 'PGRST204')) {
+        delete updateData.supplier;
+        const retry = await supabase
+          .from('products')
+          .update(updateData)
+          .eq('id', id)
+          .select('*')
+          .single();
+        updatedProd = retry.data;
+        updateErr = retry.error;
+      }
 
       if (updateErr) {
         console.error('Supabase update error:', updateErr);
@@ -276,6 +290,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           low_stock_threshold = COALESCE(?, low_stock_threshold),
           materials = COALESCE(?, materials),
           care_instructions = COALESCE(?, care_instructions),
+          supplier = COALESCE(?, supplier),
           weight = COALESCE(?, weight),
           dimensions = COALESCE(?, dimensions),
           published = COALESCE(?, published),
@@ -293,6 +308,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         cost_price !== undefined ? cost_price : existing.cost_price,
         stock_quantity ?? null, low_stock_threshold ?? null,
         materials ?? null, care_instructions ?? null,
+        supplier !== undefined ? supplier : (existing.supplier ?? null),
         weight ?? null, dimensions ?? null,
         published !== undefined ? (published ? 1 : 0) : null,
         featured !== undefined ? (featured ? 1 : 0) : null,
