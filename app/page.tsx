@@ -3,6 +3,7 @@ import { getDb } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
 import MobileBannerCarousel from '@/components/MobileBannerCarousel';
+import DesktopBannerCarousel from '@/components/DesktopBannerCarousel';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,79 +80,7 @@ export default async function HomePage() {
       {/* ========================================================
           1. HERO BANNER PRINCIPAL (Exibido apenas na versão Desktop)
           ======================================================== */}
-      <section className="ref-banner-section ref-desktop-banner">
-        <div className="ref-container">
-          <div className="ref-banner-card">
-            {/* Left Carousel Arrow */}
-            <button type="button" className="ref-banner-arrow arrow-left" aria-label="Anterior">
-              ‹
-            </button>
-
-            <div className="ref-banner-content">
-              {/* Left Side: Brazil Map Silhouette */}
-              <div className="ref-banner-map-box">
-                <svg
-                  className="ref-banner-map-svg"
-                  viewBox="0 0 100 100"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M35 15 C 45 10, 60 12, 70 20 C 75 25, 85 28, 90 38 C 92 48, 80 58, 75 68 C 68 78, 55 88, 45 92 C 38 88, 30 78, 25 65 C 18 55, 12 40, 20 28 C 25 20, 30 18, 35 15 Z"
-                    fill="var(--brand-navy)"
-                    opacity="0.9"
-                  />
-                </svg>
-              </div>
-
-              {/* Center: Headline & Promotional Copy */}
-              <div className="ref-banner-text-box">
-                <div className="ref-banner-fish-icon-wrap">
-                  <img
-                    src="/images/logo-peixinho.png"
-                    alt="Peixoto Semi Joias"
-                    className="ref-banner-fish-img"
-                  />
-                </div>
-                <h1 className="ref-banner-title">
-                  <span className="ref-title-line1">Peixoto</span>
-                  <span className="ref-title-badge">Semi Joias</span>
-                </h1>
-
-                <div className="ref-banner-pill">
-                  Semijoias com garantia, banhado a prata 925 e antialérgica
-                </div>
-
-                <div className="ref-banner-rates">
-                  <p className="rate-line">SEMIJOIAS COM GARANTIA • BANHADO A PRATA 925 E ANTIALÉRGICA</p>
-                  <p className="rate-sub">ATENDIMENTO EXCLUSIVO E PEDIDOS PELO WHATSAPP</p>
-                </div>
-              </div>
-
-              {/* Right Side: Model Photo */}
-              <div className="ref-banner-model-box">
-                <img
-                  src="/images/banner/model-banner.jpg"
-                  alt="Peixoto Semi Joias - Semijoias banhado a prata 925 e antialérgica"
-                  className="ref-banner-model-img"
-                />
-              </div>
-            </div>
-
-            {/* Right Carousel Arrow */}
-            <button type="button" className="ref-banner-arrow arrow-right" aria-label="Próximo">
-              ›
-            </button>
-          </div>
-
-          {/* Carousel Dots */}
-          <div className="ref-banner-dots">
-            <span className="ref-dot"></span>
-            <span className="ref-dot active"></span>
-            <span className="ref-dot"></span>
-          </div>
-        </div>
-      </section>
+      <DesktopBannerCarousel />
 
       {/* ========================================================
           2. TÍTULO DA VITRINE (Elegante, limpo e sem corações ou datas fictícias)
