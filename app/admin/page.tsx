@@ -64,6 +64,8 @@ interface OrderItem {
   customer_phone: string;
   total: number;
   status: string;
+  payment_method?: string;
+  payment_status?: string;
   created_at: string;
 }
 
@@ -393,10 +395,55 @@ export default function AdminPage() {
       });
       if (res.ok) {
         showToast('Status do pedido atualizado!');
-        loadAllData();
+        setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+        loadAllData(true);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Erro ao atualizar status', 'error');
       }
     } catch {
-      showToast('Erro ao atualizar', 'error');
+      showToast('Erro ao atualizar status', 'error');
+    }
+  };
+
+  const handleUpdateOrderPayment = async (id: number, field: 'payment_method' | 'payment_status', value: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+      if (res.ok) {
+        showToast(field === 'payment_method' ? 'Forma de pagamento atualizada!' : 'Situação do pagamento atualizada!');
+        setOrders(prev => prev.map(o => o.id === id ? { ...o, [field]: value } : o));
+        loadAllData(true);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Erro ao atualizar pagamento', 'error');
+      }
+    } catch {
+      showToast('Erro ao atualizar pagamento', 'error');
+    }
+  };
+
+  const handleDeleteOrder = async (id: number, orderNumber: string) => {
+    if (!confirm(`Tem certeza que deseja excluir o pedido ${orderNumber}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setOrders(prev => prev.filter(o => o.id !== id));
+        showToast(`Pedido ${orderNumber} excluído com sucesso!`);
+        loadAllData(true);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Erro ao excluir pedido', 'error');
+      }
+    } catch {
+      showToast('Erro ao conectar ao servidor para excluir', 'error');
     }
   };
 
@@ -1059,58 +1106,153 @@ export default function AdminPage() {
               {activeTab === 'pedidos' && (
                 <div>
                   <div className="admin-card-section">
-                    <div className="admin-card-section-header">
-                      <h3 className="admin-card-section-title">Pedidos Recebidos ({orders.length})</h3>
+                    <div className="admin-card-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <h3 className="admin-card-section-title">Pedidos Recebidos ({orders.length})</h3>
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                          Gerencie status, forma de pagamento, confirmação e exclusão de pedidos via WhatsApp.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => loadAllData(true)}
+                        className="admin-topbar-btn"
+                        style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>refresh</span>
+                        Atualizar
+                      </button>
                     </div>
 
                     {orders.length > 0 ? (
-                      <table className="admin-zom-table">
-                        <thead>
-                          <tr>
-                            <th>Nº Pedido</th>
-                            <th>Data</th>
-                            <th>Cliente</th>
-                            <th>WhatsApp</th>
-                            <th>Valor Total</th>
-                            <th>Status Atual</th>
-                            <th>Mudar Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {orders.map(o => (
-                            <tr key={o.id}>
-                              <td><strong>{o.order_number}</strong></td>
-                              <td>{new Date(o.created_at).toLocaleDateString('pt-BR')}</td>
-                              <td>{o.customer_name || 'Cliente WhatsApp'}</td>
-                              <td>{o.customer_phone || '—'}</td>
-                              <td><strong>{fmtCurrency(o.total)}</strong></td>
-                              <td>
-                                <span className={`zom-badge ${
-                                  o.status === 'concluido' ? 'zom-badge-green' :
-                                  o.status === 'cancelado' ? 'zom-badge-red' :
-                                  o.status === 'confirmado' ? 'zom-badge-blue' : 'zom-badge-yellow'
-                                }`}>
-                                  {o.status.replace('_', ' ').toUpperCase()}
-                                </span>
-                              </td>
-                              <td>
-                                <select
-                                  value={o.status}
-                                  onChange={e => handleUpdateOrderStatus(o.id, e.target.value)}
-                                  className="admin-select-sm"
-                                  style={{ borderRadius: '10px', padding: '0.4rem 0.6rem' }}
-                                >
-                                  <option value="aguardando_contato">Aguardando Contato</option>
-                                  <option value="em_atendimento">Em Atendimento</option>
-                                  <option value="confirmado">Confirmado / Pago</option>
-                                  <option value="concluido">Concluído (Entregue)</option>
-                                  <option value="cancelado">Cancelado</option>
-                                </select>
-                              </td>
+                      <div className="admin-table-responsive" style={{ overflowX: 'auto' }}>
+                        <table className="admin-zom-table">
+                          <thead>
+                            <tr>
+                              <th>Nº Pedido</th>
+                              <th>Data</th>
+                              <th>Cliente</th>
+                              <th>WhatsApp</th>
+                              <th>Valor Total</th>
+                              <th>Status Atendimento</th>
+                              <th>Forma Pagamento</th>
+                              <th>Situação Pagamento</th>
+                              <th style={{ textAlign: 'center' }}>Ações</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {orders.map(o => {
+                              const payMethod = o.payment_method || 'pendente';
+                              const payStatus = o.payment_status || (o.status === 'concluido' || o.status === 'confirmado' ? 'pago' : 'pendente');
+
+                              return (
+                                <tr key={o.id}>
+                                  <td><strong>{o.order_number}</strong></td>
+                                  <td>{new Date(o.created_at).toLocaleDateString('pt-BR')}</td>
+                                  <td>{o.customer_name || 'Cliente WhatsApp'}</td>
+                                  <td>
+                                    {o.customer_phone && o.customer_phone !== '—' ? (
+                                      <a
+                                        href={`https://wa.me/${o.customer_phone.replace(/\D/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: '#059669', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                                      >
+                                        <span>💬</span> {o.customer_phone}
+                                      </a>
+                                    ) : (
+                                      <span style={{ color: '#94a3b8' }}>—</span>
+                                    )}
+                                  </td>
+                                  <td><strong style={{ color: '#1a2234' }}>{fmtCurrency(o.total)}</strong></td>
+                                  
+                                  {/* Status do Pedido no Funil */}
+                                  <td>
+                                    <select
+                                      value={o.status}
+                                      onChange={e => handleUpdateOrderStatus(o.id, e.target.value)}
+                                      className="admin-select-sm"
+                                      style={{
+                                        borderRadius: '8px',
+                                        padding: '0.35rem 0.55rem',
+                                        fontWeight: 600,
+                                        fontSize: '0.78rem',
+                                        border: '1px solid #cbd5e1',
+                                        background: o.status === 'concluido' ? '#ecfdf5' : o.status === 'cancelado' ? '#fef2f2' : o.status === 'confirmado' ? '#eff6ff' : '#fffbeb'
+                                      }}
+                                    >
+                                      <option value="aguardando_contato">Aguardando Contato</option>
+                                      <option value="em_atendimento">Em Atendimento</option>
+                                      <option value="confirmado">Confirmado</option>
+                                      <option value="concluido">Concluído (Entregue)</option>
+                                      <option value="cancelado">Cancelado</option>
+                                    </select>
+                                  </td>
+
+                                  {/* Forma de Pagamento */}
+                                  <td>
+                                    <select
+                                      value={payMethod}
+                                      onChange={e => handleUpdateOrderPayment(o.id, 'payment_method', e.target.value)}
+                                      className="admin-select-sm"
+                                      style={{ borderRadius: '8px', padding: '0.35rem 0.55rem', fontSize: '0.78rem' }}
+                                    >
+                                      <option value="pendente">A Combinar</option>
+                                      <option value="pix">PIX</option>
+                                      <option value="credito">Cartão de Crédito</option>
+                                      <option value="debito">Cartão de Débito</option>
+                                      <option value="dinheiro">Dinheiro</option>
+                                      <option value="link">Link de Pagamento</option>
+                                    </select>
+                                  </td>
+
+                                  {/* Situação do Pagamento */}
+                                  <td>
+                                    <select
+                                      value={payStatus}
+                                      onChange={e => handleUpdateOrderPayment(o.id, 'payment_status', e.target.value)}
+                                      className="admin-select-sm"
+                                      style={{
+                                        borderRadius: '8px',
+                                        padding: '0.35rem 0.55rem',
+                                        fontWeight: 700,
+                                        fontSize: '0.78rem',
+                                        color: payStatus === 'pago' ? '#059669' : payStatus === 'estornado' ? '#dc2626' : '#d97706',
+                                        background: payStatus === 'pago' ? '#dcfce7' : payStatus === 'estornado' ? '#fee2e2' : '#fef3c7'
+                                      }}
+                                    >
+                                      <option value="pendente">⏳ Pendente</option>
+                                      <option value="pago">✅ Pago</option>
+                                      <option value="estornado">❌ Estornado</option>
+                                    </select>
+                                  </td>
+
+                                  {/* Botão de Excluir */}
+                                  <td style={{ textAlign: 'center' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteOrder(o.id, o.order_number)}
+                                      className="admin-btn-danger-sm"
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.25rem',
+                                        padding: '0.35rem 0.65rem',
+                                        fontSize: '0.75rem',
+                                        borderRadius: '6px'
+                                      }}
+                                      title="Excluir este pedido"
+                                    >
+                                      <span className="material-symbols-outlined" style={{ fontSize: '0.95rem' }}>delete</span>
+                                      Excluir
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       <div className="admin-empty">Ainda não há pedidos registrados.</div>
                     )}

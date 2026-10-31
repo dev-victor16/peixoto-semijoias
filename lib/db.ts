@@ -113,6 +113,8 @@ function initializeSchema(db: Database.Database) {
       customer_notes TEXT,
       subtotal REAL NOT NULL DEFAULT 0,
       total REAL NOT NULL DEFAULT 0,
+      payment_method TEXT DEFAULT 'pendente',
+      payment_status TEXT DEFAULT 'pendente',
       admin_notes TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -214,6 +216,17 @@ function initializeSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_product_variations_product ON product_variations(product_id);
     CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date);
   `);
+
+  // Migrações de colunas para bancos existentes
+  try {
+    const orderCols = db.prepare("PRAGMA table_info(orders)").all().map((c: any) => c.name);
+    if (!orderCols.includes('payment_method')) {
+      db.prepare("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'pendente'").run();
+    }
+    if (!orderCols.includes('payment_status')) {
+      db.prepare("ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'pendente'").run();
+    }
+  } catch {}
 
   // Always guarantee default admin user exists
   const defaultHash = '$2b$12$okUwDpH8OZyERrfx/UfJj./hLZUiu/QPe05ii5Fy5ytqmdhycnnOe';

@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const user = await requireAuth();
     const { id } = await params;
     const body = await request.json();
-    const { status, admin_notes, customer_name, customer_phone } = body;
+    const { status, admin_notes, customer_name, customer_phone, payment_method, payment_status } = body;
 
     const validStatuses = [
       'aguardando_contato', 'em_atendimento', 'aguardando_confirmacao',
@@ -127,6 +127,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (admin_notes !== undefined) updateData.admin_notes = admin_notes;
       if (customer_name !== undefined) updateData.customer_name = customer_name;
       if (customer_phone !== undefined) updateData.customer_phone = customer_phone;
+      if (payment_method !== undefined) updateData.payment_method = payment_method;
+      if (payment_status !== undefined) updateData.payment_status = payment_status;
 
       const { data: updated } = await supabase.from('orders').update(updateData).eq('id', id).select('*').single();
       const { data: updatedItems } = await supabase.from('order_items').select('*').eq('order_id', id);
@@ -196,6 +198,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (customer_phone !== undefined) {
         db.prepare('UPDATE orders SET customer_phone = ?, updated_at = datetime(\'now\') WHERE id = ?').run(customer_phone, id);
       }
+      if (payment_method !== undefined) {
+        db.prepare('UPDATE orders SET payment_method = ?, updated_at = datetime(\'now\') WHERE id = ?').run(payment_method, id);
+      }
+      if (payment_status !== undefined) {
+        db.prepare('UPDATE orders SET payment_status = ?, updated_at = datetime(\'now\') WHERE id = ?').run(payment_status, id);
+      }
 
       logAdminAction(user.userId, user.username, 'update_order', 'order', Number(id), `Status: ${status || order.status}`);
     });
@@ -210,6 +218,90 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized') return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     const msg = e instanceof Error ? e.message : 'Erro ao atualizar pedido';
+    return NextResponse.json({ error: msg }, { status: 400 });
+  }
+}
+
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireAuth();
+    const { id } = await params;
+
+    // 1. Supabase first
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { data: order } = await supabase.from('orders').select('*').eq('id', id).single();
+      if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
+
+      // Se o pedido estava confirmado ou em preparação, estorna o estoque antes de excluir
+      if (['confirmado', 'em_preparacao'].includes(order.status)) {
+        const { data: items } = await supabase.from('order_items').select('*').eq('order_id', order.id);
+        if (items) {
+          for (const item of items) {
+            const { data: product } = await supabase.from('products').select('*').eq('id', item.product_id).single();
+            if (product) {
+              const newQty = product.stock_quantity + item.quantity;
+              await supabase.from('products').update({ stock_quantity: newQty, updated_at: new Date().toISOString() }).eq('id', item.product_id);
+              await supabase.from('stock_movements').insert({
+                product_id: item.product_id,
+                type: 'entrada',
+                quantity: item.quantity,
+                previous_quantity: product.stock_quantity,
+                new_quantity: newQty,
+                reason: `Pedido ${order.order_number} excluído - estorno de estoque`,
+                reference_type: 'order',
+                reference_id: order.id,
+                created_by: user.username
+              });
+            }
+          }
+        }
+      }
+
+      // Exclui itens associados, histórico e pedido
+      await supabase.from('order_items').delete().eq('order_id', id);
+      await supabase.from('order_status_history').delete().eq('order_id', id);
+      const { error: delErr } = await supabase.from('orders').delete().eq('id', id);
+      if (delErr) throw new Error(delErr.message);
+
+      logAdminAction(user.userId, user.username, 'delete_order', 'order', Number(id), `Pedido ${order.order_number} excluído`);
+      return NextResponse.json({ success: true, message: 'Pedido excluído com sucesso' });
+    }
+
+    // 2. Fallback to SQLite
+    const db = getDb();
+    const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 });
+
+    const deleteOrderTx = db.transaction(() => {
+      // Estorna estoque se necessário
+      if (['confirmado', 'em_preparacao'].includes(order.status as string)) {
+        const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(id) as Record<string, unknown>[];
+        for (const item of items) {
+          const product = db.prepare('SELECT * FROM products WHERE id = ?').get(item.product_id) as Record<string, unknown>;
+          if (product) {
+            const newQty = (product.stock_quantity as number) + (item.quantity as number);
+            db.prepare('UPDATE products SET stock_quantity = ?, updated_at = datetime(\'now\') WHERE id = ?').run(newQty, item.product_id);
+            db.prepare(`
+              INSERT INTO stock_movements (product_id, type, quantity, previous_quantity, new_quantity, reason, reference_type, reference_id, created_by)
+              VALUES (?, 'entrada', ?, ?, ?, ?, 'order', ?, ?)
+            `).run(item.product_id, item.quantity, product.stock_quantity, newQty, `Pedido ${order.order_number} excluído - estorno de estoque`, id, user.username);
+          }
+        }
+      }
+
+      db.prepare('DELETE FROM order_items WHERE order_id = ?').run(id);
+      db.prepare('DELETE FROM order_status_history WHERE order_id = ?').run(id);
+      db.prepare('DELETE FROM orders WHERE id = ?').run(id);
+
+      logAdminAction(user.userId, user.username, 'delete_order', 'order', Number(id), `Pedido ${order.order_number} excluído`);
+    });
+
+    deleteOrderTx();
+    return NextResponse.json({ success: true, message: 'Pedido excluído com sucesso' });
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === 'Unauthorized') return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    const msg = e instanceof Error ? e.message : 'Erro ao excluir pedido';
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 }
