@@ -15,9 +15,9 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: CartItem) => void;
+  addItem: (item: CartItem) => { success: boolean; message?: string };
   removeItem: (productId: number, variationValue?: string) => void;
-  updateQuantity: (productId: number, quantity: number, variationValue?: string) => void;
+  updateQuantity: (productId: number, quantity: number, variationValue?: string) => { success: boolean; message?: string };
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -48,20 +48,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, loaded]);
 
-  const addItem = useCallback((item: CartItem) => {
+  const addItem = useCallback((item: CartItem): { success: boolean; message?: string } => {
+    let result = { success: true };
+    const maxStock = typeof item.stock_available === 'number' ? item.stock_available : 99;
+
     setItems(prev => {
       const key = `${item.product_id}-${item.variation_value || ''}`;
       const existing = prev.find(i => `${i.product_id}-${i.variation_value || ''}` === key);
+      const currentQty = existing ? existing.quantity : 0;
+      const targetQty = currentQty + item.quantity;
+
+      if (targetQty > maxStock) {
+        result = {
+          success: false,
+          message: `Desculpe, temos apenas ${maxStock} unidade(s) desta peça em estoque.`
+        };
+        return prev;
+      }
+
       if (existing) {
         return prev.map(i =>
           `${i.product_id}-${i.variation_value || ''}` === key
-            ? { ...i, quantity: i.quantity + item.quantity }
+            ? { ...i, quantity: targetQty, stock_available: maxStock }
             : i
         );
       }
-      return [...prev, item];
+      return [...prev, { ...item, stock_available: maxStock }];
     });
-    setIsOpen(true);
+
+    if (result.success) {
+      setIsOpen(true);
+    }
+    return result;
   }, []);
 
   const removeItem = useCallback((productId: number, variationValue?: string) => {
@@ -70,16 +88,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     ));
   }, []);
 
-  const updateQuantity = useCallback((productId: number, quantity: number, variationValue?: string) => {
+  const updateQuantity = useCallback((productId: number, quantity: number, variationValue?: string): { success: boolean; message?: string } => {
     if (quantity <= 0) {
       removeItem(productId, variationValue);
-      return;
+      return { success: true };
     }
-    setItems(prev => prev.map(i =>
-      i.product_id === productId && (i.variation_value || '') === (variationValue || '')
-        ? { ...i, quantity }
-        : i
-    ));
+
+    let result = { success: true };
+
+    setItems(prev => prev.map(i => {
+      if (i.product_id === productId && (i.variation_value || '') === (variationValue || '')) {
+        const maxStock = typeof i.stock_available === 'number' ? i.stock_available : 99;
+        if (quantity > maxStock) {
+          result = {
+            success: false,
+            message: `Desculpe, limite de estoque atingido (${maxStock} disponíveis).`
+          };
+          return i;
+        }
+        return { ...i, quantity };
+      }
+      return i;
+    }));
+
+    return result;
   }, [removeItem]);
 
   const clearCart = useCallback(() => setItems([]), []);

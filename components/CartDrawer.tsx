@@ -15,6 +15,7 @@ export default function CartDrawer() {
   });
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [drawerError, setDrawerError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -151,6 +152,20 @@ export default function CartDrawer() {
           <span>Catálogo Digital • Atendimento e confirmação direta no WhatsApp</span>
         </div>
 
+        {drawerError && (
+          <div style={{
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#dc2626',
+            padding: '0.6rem 1rem',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            textAlign: 'center'
+          }}>
+            {drawerError}
+          </div>
+        )}
+
         {/* Content */}
         {items.length === 0 ? (
           <div className="cart-empty">
@@ -225,7 +240,14 @@ export default function CartDrawer() {
                           <span>{item.quantity}</span>
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.variation_value)}
+                            onClick={() => {
+                              setDrawerError(null);
+                              const res = updateQuantity(item.product_id, item.quantity + 1, item.variation_value);
+                              if (!res.success && res.message) {
+                                setDrawerError(res.message);
+                                setTimeout(() => setDrawerError(null), 3000);
+                              }
+                            }}
                             aria-label="Aumentar quantidade"
                           >
                             +

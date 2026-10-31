@@ -32,6 +32,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const images = product.images.length > 0
@@ -70,7 +71,8 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const installment2x = (effectivePrice / 2).toFixed(2).replace('.', ',');
 
   const handleAddToCart = () => {
-    addItem({
+    setStockError(null);
+    const result = addItem({
       product_id: product.id,
       product_name: product.name,
       product_sku: product.sku,
@@ -82,8 +84,13 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       stock_available: product.stock_quantity
     });
 
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    if (result.success) {
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1500);
+    } else {
+      setStockError(result.message || 'Estoque insuficiente');
+      setTimeout(() => setStockError(null), 3500);
+    }
   };
 
   const handleBuyNow = () => {
@@ -223,7 +230,10 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             <button
               type="button"
               className="ref-qty-btn"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              onClick={() => {
+                setStockError(null);
+                setQuantity(Math.max(1, quantity - 1));
+              }}
               aria-label="Diminuir quantidade"
             >
               -
@@ -232,7 +242,14 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             <button
               type="button"
               className="ref-qty-btn"
-              onClick={() => setQuantity(Math.min(product.stock_quantity || 99, quantity + 1))}
+              onClick={() => {
+                if (quantity < (product.stock_quantity || 1)) {
+                  setQuantity(quantity + 1);
+                } else {
+                  setStockError(`Temos apenas ${product.stock_quantity || 1} unidade(s) em estoque.`);
+                  setTimeout(() => setStockError(null), 3000);
+                }
+              }}
               aria-label="Aumentar quantidade"
             >
               +
@@ -247,6 +264,29 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             {added ? '✓ ADICIONADO À SACOLA!' : 'ADICIONAR À SACOLA'}
           </button>
         </div>
+
+        {stockError && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#dc2626',
+            borderRadius: '6px',
+            padding: '0.65rem 0.85rem',
+            fontSize: '0.82rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{stockError}</span>
+          </div>
+        )}
 
         <div className="ref-detail-cta-secondary">
           <a

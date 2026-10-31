@@ -20,6 +20,7 @@ export interface ProductCardData {
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
 
   const effectivePrice = product.promo_price && product.promo_price < product.price
     ? product.promo_price
@@ -30,8 +31,9 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   const handleBuy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setCardError(null);
 
-    addItem({
+    const result = addItem({
       product_id: product.id,
       product_name: product.name,
       product_sku: `PX-${product.id}`,
@@ -43,8 +45,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       stock_available: product.stock_quantity
     });
 
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
+    if (result.success) {
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1200);
+    } else {
+      setCardError(result.message || 'Sem estoque');
+      setTimeout(() => setCardError(null), 2500);
+    }
   };
 
   return (
@@ -90,7 +97,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           className="ref-product-btn"
           title="Adicionar à sacola e consultar no WhatsApp"
         >
-          {added ? 'ADICIONADO' : 'COMPRAR'}
+          {added ? 'ADICIONADO' : cardError ? 'LIMITE ATINGIDO' : 'COMPRAR'}
         </button>
       </div>
     </div>
