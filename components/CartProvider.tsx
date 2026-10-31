@@ -49,7 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, loaded]);
 
   const addItem = useCallback((item: CartItem): { success: boolean; message?: string } => {
-    let result = { success: true };
+    let result: { success: boolean; message?: string } = { success: true };
     const maxStock = typeof item.stock_available === 'number' ? item.stock_available : 99;
 
     setItems(prev => {
@@ -94,7 +94,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     }
 
-    let result = { success: true };
+    let result: { success: boolean; message?: string } = { success: true };
 
     setItems(prev => prev.map(i => {
       if (i.product_id === productId && (i.variation_value || '') === (variationValue || '')) {

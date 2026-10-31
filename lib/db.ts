@@ -402,7 +402,7 @@ export function generateOrderNumber(): string {
   const lastOrder = db.prepare(
     "SELECT order_number FROM orders WHERE order_number LIKE ? ORDER BY id DESC LIMIT 1"
   ).get(`${prefix}%`) as { order_number: string } | undefined;
-  
+
   let sequence = 1;
   if (lastOrder) {
     const lastSeq = parseInt(lastOrder.order_number.slice(prefix.length), 10);
