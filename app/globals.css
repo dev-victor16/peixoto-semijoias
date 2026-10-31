@@ -572,11 +572,13 @@ button {
 
 .ref-desktop-banner-card {
   position: relative;
-  width: 100%;
-  border-radius: 12px;
+  width: 95%;
+  max-width: 1140px;
+  margin: 0 auto;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(31, 45, 77, 0.08);
-  border: 1px solid rgba(86, 107, 152, 0.12);
+  box-shadow: 0 6px 24px rgba(31, 45, 77, 0.1);
+  border: 1px solid rgba(86, 107, 152, 0.15);
   background-color: #ffffff;
 }
 
@@ -602,6 +604,9 @@ button {
   max-height: 480px;
   object-fit: cover;
   display: block;
+  border-radius: 18px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
 }
 
 .ref-desktop-banner-arrow {
@@ -672,6 +677,7 @@ button {
   .ref-mobile-banner-wrapper {
     display: block;
     width: 100%;
+    padding: 0.85rem 0.95rem 0.4rem;
     position: relative;
     overflow: hidden;
   }
@@ -680,7 +686,10 @@ button {
 .ref-mobile-banner-container {
   position: relative;
   width: 100%;
+  border-radius: 18px;
   overflow: hidden;
+  box-shadow: 0 4px 18px rgba(31, 45, 77, 0.1);
+  border: 1px solid rgba(86, 107, 152, 0.12);
   user-select: none;
 }
 
@@ -706,6 +715,9 @@ button {
   max-height: 520px;
   object-fit: cover;
   display: block;
+  border-radius: 18px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
 }
 
 .ref-mobile-banner-arrow {

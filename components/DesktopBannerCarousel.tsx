@@ -27,7 +27,7 @@ export default function DesktopBannerCarousel() {
     stopAutoPlay();
     timerRef.current = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % desktopBanners.length);
-    }, 5000);
+    }, 7500);
   };
 
   const stopAutoPlay = () => {

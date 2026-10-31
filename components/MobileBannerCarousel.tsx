@@ -28,7 +28,7 @@ export default function MobileBannerCarousel() {
     stopAutoPlay();
     timerRef.current = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % mobileBanners.length);
-    }, 4500);
+    }, 7500);
   };
 
   const stopAutoPlay = () => {
