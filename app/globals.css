@@ -844,7 +844,7 @@ button {
 
 .ref-product-media {
   position: relative;
-  aspect-ratio: 3/4;
+  aspect-ratio: 4 / 3;
   width: 100%;
   overflow: hidden;
   background-color: var(--ref-off-white);
@@ -2759,7 +2759,7 @@ button {
 .ref-detail-main-image-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   background: #fdfdfd;
   border-radius: 8px;
   overflow: hidden;
@@ -2853,8 +2853,8 @@ button {
 }
 
 .ref-detail-thumb-btn {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 60px;
   border-radius: 6px;
   overflow: hidden;
   border: 2px solid transparent;
