@@ -99,7 +99,7 @@ export default function AdminPage() {
     cost_price: '',
     category_id: '1',
     stock_quantity: '1',
-    materials: 'Banho Ouro 18k (10 milésimos)',
+    materials: 'Banho a Prata 925 (Antialérgica)',
     image_url: '',
     description: '',
     published: true,
@@ -206,7 +206,7 @@ export default function AdminPage() {
       cost_price: '',
       category_id: '1',
       stock_quantity: '1',
-      materials: 'Banho Ouro 18k (10 milésimos)',
+      materials: 'Banho a Prata 925 (Antialérgica)',
       image_url: '',
       description: '',
       published: true
@@ -223,7 +223,7 @@ export default function AdminPage() {
       cost_price: prod.cost_price?.toString() || '',
       category_id: '1',
       stock_quantity: prod.stock_quantity?.toString() || '0',
-      materials: prod.materials || 'Banho Ouro 18k (10 milésimos)',
+      materials: prod.materials || 'Banho a Prata 925 (Antialérgica)',
       image_url: prod.image || prod.primary_image || prod.first_image || '',
       description: '',
       published: prod.published === 1
@@ -853,7 +853,7 @@ export default function AdminPage() {
                         <div>
                           <h3 className="admin-card-section-title">Estoque de Semijoias ({products.length} peças cadastradas)</h3>
                           <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
-                            Gerencie detalhes do banho, pedras, estoques mínimos e precificação.
+                            Gerencie peças, estoques mínimos e precificação.
                           </p>
                         </div>
                         <button onClick={openCreateProduct} className="zom-btn-primary">
@@ -870,7 +870,7 @@ export default function AdminPage() {
                           </span>
                           <input
                             type="text"
-                            placeholder="Buscar por nome, SKU ou banho (ex: ouro 18k)..."
+                            placeholder="Buscar por nome ou SKU..."
                             value={productSearch}
                             onChange={e => setProductSearch(e.target.value)}
                             className="zom-input"
@@ -898,7 +898,7 @@ export default function AdminPage() {
                         <table className="admin-zom-table">
                           <thead>
                             <tr>
-                              <th>Peça & Banho</th>
+                              <th>Semijoia</th>
                               <th>SKU</th>
                               <th>Preço Venda</th>
                               <th>Preço Custo</th>
@@ -933,15 +933,9 @@ export default function AdminPage() {
                                           {p.name}
                                         </strong>
                                         <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', alignItems: 'center' }}>
-                                          {p.materials && (
-                                            <span className={`zom-badge ${
-                                              isGold ? 'zom-badge-gold' :
-                                              isSilver ? 'zom-badge-silver' :
-                                              isRose ? 'zom-badge-rose' : 'zom-badge-gray'
-                                            }`} style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }}>
-                                              {p.materials}
-                                            </span>
-                                          )}
+                                          <span className="zom-badge zom-badge-silver" style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem' }}>
+                                            Prata 925
+                                          </span>
                                         </div>
                                       </div>
                                     </div>
@@ -1221,7 +1215,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     required
-                    placeholder="Ex: Colar Elo Português Banho Ouro 18k"
+                    placeholder="Ex: Colar Elo Português Prata 925"
                     value={prodForm.name}
                     onChange={e => setProdForm({ ...prodForm, name: e.target.value })}
                     className="zom-input"
@@ -1231,19 +1225,14 @@ export default function AdminPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
                   <div className="zom-input-group">
                     <label className="zom-input-label">Banho / Acabamento</label>
-                    <select
-                      value={prodForm.materials}
-                      onChange={e => setProdForm({ ...prodForm, materials: e.target.value })}
+                    <input
+                      type="text"
+                      readOnly
+                      value="Banho a Prata 925 (Antialérgica)"
                       className="zom-input"
-                    >
-                      <option value="Banho Ouro 18k (10 milésimos)">Banho Ouro 18k (10 milésimos)</option>
-                      <option value="Banho Ouro 18k (5 milésimos)">Banho Ouro 18k (5 milésimos)</option>
-                      <option value="Prata 925 com Verniz Suíço">Prata 925 com Verniz Suíço</option>
-                      <option value="Banho Ródio Branco">Banho Ródio Branco</option>
-                      <option value="Banho Ródio Negro">Banho Ródio Negro</option>
-                      <option value="Banho Rosé Gold">Banho Rosé Gold</option>
-                      <option value="Hipoalergênico & Níquel Free">Hipoalergênico & Níquel Free</option>
-                    </select>
+                      style={{ background: 'rgba(255,255,255,0.04)', color: '#94a3b8', cursor: 'not-allowed' }}
+                      title="Trabalhamos exclusivamente com Banho a Prata 925"
+                    />
                   </div>
 
                   <div className="zom-input-group">

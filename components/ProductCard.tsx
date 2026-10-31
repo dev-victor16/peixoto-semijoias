@@ -19,7 +19,6 @@ export interface ProductCardData {
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem } = useCart();
-  const [selectedColor, setSelectedColor] = useState<'ouro' | 'prata'>('ouro');
   const [added, setAdded] = useState(false);
 
   const effectivePrice = product.promo_price && product.promo_price < product.price
@@ -40,7 +39,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       quantity: 1,
       image: product.image_url,
       variation_type: 'Banho',
-      variation_value: selectedColor === 'ouro' ? 'Ouro 18k' : 'Prata 925',
+      variation_value: 'Prata 925 (Antialérgica)',
       stock_available: product.stock_quantity
     });
 
