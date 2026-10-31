@@ -426,6 +426,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpdateOrderCustomer = async (id: number, customer_name: string, customer_phone: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_name, customer_phone })
+      });
+      if (res.ok) {
+        showToast('Dados do cliente salvos!');
+        setOrders(prev => prev.map(o => o.id === id ? { ...o, customer_name, customer_phone } : o));
+        loadAllData(true);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Erro ao salvar cliente', 'error');
+      }
+    } catch {
+      showToast('Erro ao salvar cliente', 'error');
+    }
+  };
+
   const handleDeleteOrder = async (id: number, orderNumber: string) => {
     if (!confirm(`Tem certeza que deseja excluir o pedido ${orderNumber}? Esta ação não pode ser desfeita.`)) {
       return;
@@ -1131,9 +1151,8 @@ export default function AdminPage() {
                             <tr>
                               <th>Nº Pedido</th>
                               <th>Data</th>
-                              <th>Cliente</th>
-                              <th>WhatsApp</th>
-                              <th>Valor Total</th>
+                              <th>Cliente & WhatsApp</th>
+                              <th>Total</th>
                               <th>Status Atendimento</th>
                               <th>Forma Pagamento</th>
                               <th>Situação Pagamento</th>
@@ -1149,21 +1168,73 @@ export default function AdminPage() {
                                 <tr key={o.id}>
                                   <td><strong>{o.order_number}</strong></td>
                                   <td>{new Date(o.created_at).toLocaleDateString('pt-BR')}</td>
-                                  <td>{o.customer_name || 'Cliente WhatsApp'}</td>
+                                  
+                                  {/* Cliente & WhatsApp editáveis diretamente */}
                                   <td>
-                                    {o.customer_phone && o.customer_phone !== '—' ? (
-                                      <a
-                                        href={`https://wa.me/${o.customer_phone.replace(/\D/g, '')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{ color: '#059669', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                                      >
-                                        <span>💬</span> {o.customer_phone}
-                                      </a>
-                                    ) : (
-                                      <span style={{ color: '#94a3b8' }}>—</span>
-                                    )}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '170px' }}>
+                                      <input
+                                        type="text"
+                                        defaultValue={o.customer_name || ''}
+                                        placeholder="Nome do cliente..."
+                                        onBlur={e => {
+                                          if (e.target.value !== (o.customer_name || '')) {
+                                            handleUpdateOrderCustomer(o.id, e.target.value, o.customer_phone || '');
+                                          }
+                                        }}
+                                        style={{
+                                          padding: '0.25rem 0.5rem',
+                                          fontSize: '0.8rem',
+                                          borderRadius: '6px',
+                                          border: '1px solid #cbd5e1',
+                                          width: '100%'
+                                        }}
+                                        title="Clique para editar o nome e saia do campo para salvar"
+                                      />
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                        <input
+                                          type="text"
+                                          defaultValue={o.customer_phone || ''}
+                                          placeholder="(31) 99999-9999"
+                                          onBlur={e => {
+                                            if (e.target.value !== (o.customer_phone || '')) {
+                                              handleUpdateOrderCustomer(o.id, o.customer_name || '', e.target.value);
+                                            }
+                                          }}
+                                          style={{
+                                            padding: '0.25rem 0.5rem',
+                                            fontSize: '0.78rem',
+                                            borderRadius: '6px',
+                                            border: '1px solid #cbd5e1',
+                                            flex: 1
+                                          }}
+                                          title="Clique para adicionar/editar o WhatsApp"
+                                        />
+                                        {o.customer_phone && o.customer_phone !== '—' && (
+                                          <a
+                                            href={`https://wa.me/${o.customer_phone.replace(/\D/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                              color: '#059669',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              background: '#ecfdf5',
+                                              border: '1px solid #a7f3d0',
+                                              borderRadius: '6px',
+                                              padding: '0.25rem 0.45rem',
+                                              textDecoration: 'none',
+                                              fontSize: '0.85rem'
+                                            }}
+                                            title="Abrir WhatsApp"
+                                          >
+                                            💬
+                                          </a>
+                                        )}
+                                      </div>
+                                    </div>
                                   </td>
+
                                   <td><strong style={{ color: '#1a2234' }}>{fmtCurrency(o.total)}</strong></td>
                                   
                                   {/* Status do Pedido no Funil */}

@@ -31,10 +31,25 @@ export async function GET(request: NextRequest) {
 
       const { data: orders, count, error } = await query;
       if (!error && orders) {
-        const mapped = orders.map(o => ({
-          ...o,
-          items: o.order_items || []
-        }));
+        const mapped = orders.map(o => {
+          let payMethod = 'pendente';
+          let payStatus = 'pendente';
+          if (o.admin_notes) {
+            try {
+              const parsed = JSON.parse(o.admin_notes);
+              if (parsed && typeof parsed === 'object') {
+                if (parsed.payment_method) payMethod = parsed.payment_method;
+                if (parsed.payment_status) payStatus = parsed.payment_status;
+              }
+            } catch {}
+          }
+          return {
+            ...o,
+            payment_method: (o as any).payment_method || payMethod,
+            payment_status: (o as any).payment_status || payStatus,
+            items: o.order_items || []
+          };
+        });
         return NextResponse.json({ orders: mapped, total: count || mapped.length });
       }
     }

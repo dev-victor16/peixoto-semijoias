@@ -21,8 +21,21 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
       const { data: order, error } = await query.maybeSingle();
       if (!error && order) {
+        let payMethod = 'pendente';
+        let payStatus = 'pendente';
+        if (order.admin_notes) {
+          try {
+            const parsed = JSON.parse(order.admin_notes);
+            if (parsed && typeof parsed === 'object') {
+              if (parsed.payment_method) payMethod = parsed.payment_method;
+              if (parsed.payment_status) payStatus = parsed.payment_status;
+            }
+          } catch {}
+        }
         return NextResponse.json({
           ...order,
+          payment_method: (order as any).payment_method || payMethod,
+          payment_status: (order as any).payment_status || payStatus,
           items: order.order_items || [],
           history: order.order_status_history || []
         });
@@ -124,18 +137,39 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
       const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
       if (status !== undefined) updateData.status = status;
-      if (admin_notes !== undefined) updateData.admin_notes = admin_notes;
       if (customer_name !== undefined) updateData.customer_name = customer_name;
       if (customer_phone !== undefined) updateData.customer_phone = customer_phone;
-      if (payment_method !== undefined) updateData.payment_method = payment_method;
-      if (payment_status !== undefined) updateData.payment_status = payment_status;
 
-      const { data: updated } = await supabase.from('orders').update(updateData).eq('id', id).select('*').single();
+      // Mantém metadados de pagamento em admin_notes (compatível tanto com bancos com coluna quanto schema legado)
+      let currentMeta: Record<string, any> = {};
+      if (order.admin_notes) {
+        try {
+          const parsed = JSON.parse(order.admin_notes);
+          if (parsed && typeof parsed === 'object') currentMeta = parsed;
+        } catch {
+          currentMeta = { note: order.admin_notes };
+        }
+      }
+      if (payment_method !== undefined) currentMeta.payment_method = payment_method;
+      if (payment_status !== undefined) currentMeta.payment_status = payment_status;
+      if (admin_notes !== undefined) currentMeta.note = admin_notes;
+
+      updateData.admin_notes = JSON.stringify(currentMeta);
+
+      const { data: updated, error: updateErr } = await supabase.from('orders').update(updateData).eq('id', id).select('*').single();
+      if (updateErr) throw new Error(updateErr.message);
+
       const { data: updatedItems } = await supabase.from('order_items').select('*').eq('order_id', id);
       const { data: updatedHist } = await supabase.from('order_status_history').select('*').eq('order_id', id).order('created_at', { ascending: true });
 
       logAdminAction(user.userId, user.username, 'update_order', 'order', Number(id), `Status: ${status || order.status}`);
-      return NextResponse.json({ ...updated, items: updatedItems || [], history: updatedHist || [] });
+      return NextResponse.json({
+        ...updated,
+        payment_method: currentMeta.payment_method || 'pendente',
+        payment_status: currentMeta.payment_status || 'pendente',
+        items: updatedItems || [],
+        history: updatedHist || []
+      });
     }
 
     // 2. Fallback to SQLite
