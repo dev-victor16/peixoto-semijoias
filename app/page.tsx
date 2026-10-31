@@ -261,7 +261,7 @@ export default async function HomePage() {
           6. BOTÃO FLUTUANTE DO WHATSAPP (Abertura direta da conversa)
           ======================================================== */}
       <a
-        href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20as%20pe%C3%A7as%20do%20cat%C3%A1logo%20Peixoto%20Semi%20Joias."
+        href="https://wa.me/5531995779163?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20as%20pe%C3%A7as%20do%20cat%C3%A1logo%20Peixoto%20Semi%20Joias."
         target="_blank"
         rel="noopener noreferrer"
         className="ref-floating-whatsapp"

@@ -212,20 +212,20 @@ button {
 }
 
 .ref-header-logo-img {
-  height: 80px;
-  width: 80px;
-  object-fit: cover;
+  height: 98px;
+  width: 98px;
+  object-fit: contain;
   border: none;
   border-radius: 0;
   background: transparent;
   display: block;
   image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: high-quality;
   transition: transform 0.25s ease;
 }
 
 .ref-header-logo-img:hover {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 /* LADO DIREITO: Lupinha e Sacola */
@@ -1640,8 +1640,8 @@ button {
     font-size: 1.35rem;
   }
   .ref-header-logo-img {
-    height: 64px;
-    width: 64px;
+    height: 76px;
+    width: 76px;
   }
   .ref-cart-value {
     display: none;

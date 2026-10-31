@@ -10,7 +10,7 @@ interface StoreSettings {
 export default function CartDrawer() {
   const { items, removeItem, updateQuantity, totalPrice, totalItems, isOpen, setIsOpen } = useCart();
   const [settings, setSettings] = useState<StoreSettings>({
-    whatsapp_number: '5511999999999',
+    whatsapp_number: '5531995779163',
     store_name: 'Peixoto Semi Joias'
   });
   const [copied, setCopied] = useState(false);
@@ -81,7 +81,7 @@ export default function CartDrawer() {
     setIsSubmitting(true);
 
     const message = generateWhatsAppMessage();
-    const cleanPhone = (settings.whatsapp_number || '5511999999999').replace(/\D/g, '');
+    const cleanPhone = (settings.whatsapp_number || '5531995779163').replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
     try {

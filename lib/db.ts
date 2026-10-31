@@ -231,9 +231,9 @@ function initializeSchema(db: Database.Database) {
     const defaultSettings = [
       ['store_name', 'Peixoto Semi Joias'],
       ['store_description', 'Catálogo de semijoias com acabamento sofisticado e garantia. Peças banhadas em ouro 18k e prata 925.'],
-      ['whatsapp_number', process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'],
-      ['instagram', '@peixotosemijoias'],
-      ['email', 'contato@peixotosemijoias.com.br'],
+      ['whatsapp_number', process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5531995779163'],
+      ['instagram', '@usePeixoto'],
+      ['email', '@usePeixoto'],
       ['address', ''],
       ['about_text', 'A Peixoto Semi Joias oferece semijoias com acabamento refinado e garantia. Nossas peças recebem banho de alta qualidade em ouro 18k e prata 925, pensadas para acompanhar você com elegância em todos os momentos.'],
       ['shipping_info', 'Enviamos para todo o Brasil. Detalhes de envio e prazos são informados diretamente no atendimento via WhatsApp.'],
