@@ -76,60 +76,40 @@ export default async function HomePage() {
   // Categorias oficiais da loja para a seção "Explore por Categoria"
   const categoriesList = [
     {
-      name: 'Brincos',
-      slug: 'brincos',
+      name: 'Colares e chokers',
+      slug: 'colares-e-chokers',
       subtitle: 'Prata 925',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z" />
-          <path d="M12 17v5" />
-          <circle cx="12" cy="14" r="1.5" />
-        </svg>
-      )
-    },
-    {
-      name: 'Colares',
-      slug: 'colares',
-      subtitle: 'Venezianas & Pingentes',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="9" r="6" />
-          <path d="M12 15v4" />
-          <circle cx="12" cy="20" r="1.5" />
-        </svg>
-      )
-    },
-    {
-      name: 'Anéis',
-      slug: 'aneis',
-      subtitle: 'Solitários & Cravejados',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="13" r="7" />
-          <path d="M9 6l3-3 3 3" />
-        </svg>
-      )
+      image: '/images/categories/colares-chokers.jpg'
     },
     {
       name: 'Pulseiras',
       slug: 'pulseiras',
-      subtitle: 'Rivieras & Berloques',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="8" />
-          <path d="M12 4a8 8 0 0 1 8 8" strokeDasharray="2 3" />
-        </svg>
-      )
+      subtitle: 'Prata 925',
+      image: '/images/categories/pulseiras.jpg'
     },
     {
       name: 'Conjuntos',
       slug: 'conjuntos',
-      subtitle: 'Combinações Perfeitas',
-      icon: (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      )
+      subtitle: 'Prata 925',
+      image: '/images/categories/conjuntos.jpg'
+    },
+    {
+      name: 'Berloques',
+      slug: 'berloques',
+      subtitle: 'Prata 925',
+      image: '/images/categories/berloques.jpg'
+    },
+    {
+      name: 'Anéis',
+      slug: 'aneis',
+      subtitle: 'Prata 925',
+      image: '/images/categories/aneis.jpg'
+    },
+    {
+      name: 'Brincos e piercing',
+      slug: 'brincos-e-piercing',
+      subtitle: 'Prata 925',
+      image: '/images/categories/brincos-piercing.jpg'
     }
   ];
 
@@ -191,8 +171,13 @@ export default async function HomePage() {
                 className="ref-category-card"
                 title={`Ver categoria ${cat.name}`}
               >
-                <div className="ref-category-icon-wrapper">
-                  {cat.icon}
+                <div className="ref-category-img-wrapper">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="ref-category-img"
+                    loading="lazy"
+                  />
                 </div>
                 <strong className="ref-category-name">{cat.name}</strong>
                 <span className="ref-category-tag">{cat.subtitle}</span>

@@ -232,6 +232,26 @@ function initializeSchema(db: Database.Database) {
     if (!prodCols.includes('supplier')) {
       db.prepare("ALTER TABLE products ADD COLUMN supplier TEXT").run();
     }
+
+    // Atualização das categorias oficiais da Use Peixoto
+    const defaultCats = [
+      { id: 2, name: 'Colares e chokers', slug: 'colares-e-chokers', image_url: '/images/categories/colares-chokers.jpg', sort_order: 1 },
+      { id: 4, name: 'Pulseiras', slug: 'pulseiras', image_url: '/images/categories/pulseiras.jpg', sort_order: 2 },
+      { id: 5, name: 'Conjuntos', slug: 'conjuntos', image_url: '/images/categories/conjuntos.jpg', sort_order: 3 },
+      { id: 6, name: 'Berloques', slug: 'berloques', image_url: '/images/categories/berloques.jpg', sort_order: 4 },
+      { id: 3, name: 'Anéis', slug: 'aneis', image_url: '/images/categories/aneis.jpg', sort_order: 5 },
+      { id: 1, name: 'Brincos e piercing', slug: 'brincos-e-piercing', image_url: '/images/categories/brincos-piercing.jpg', sort_order: 6 }
+    ];
+    for (const c of defaultCats) {
+      const exists = db.prepare('SELECT id FROM categories WHERE id = ?').get(c.id);
+      if (exists) {
+        db.prepare('UPDATE categories SET name = ?, slug = ?, image_url = ?, sort_order = ? WHERE id = ?')
+          .run(c.name, c.slug, c.image_url, c.sort_order, c.id);
+      } else {
+        db.prepare('INSERT INTO categories (id, name, slug, image_url, sort_order, active, featured) VALUES (?, ?, ?, ?, ?, 1, 1)')
+          .run(c.id, c.name, c.slug, c.image_url, c.sort_order);
+      }
+    }
   } catch {}
 
   // Always guarantee default admin user exists

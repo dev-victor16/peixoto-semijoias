@@ -199,22 +199,25 @@ export default function Header() {
 
             <nav className="ref-drawer-links" aria-label="Links do catálogo">
               <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                DESTAQUES
+                TODAS AS PEÇAS
               </Link>
-              <Link href="/produtos?category=brincos" onClick={() => setMobileMenuOpen(false)}>
-                BRINCOS
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+                COLARES E CHOKERS
               </Link>
-              <Link href="/produtos?category=colares" onClick={() => setMobileMenuOpen(false)}>
-                COLARES
-              </Link>
-              <Link href="/produtos?category=aneis" onClick={() => setMobileMenuOpen(false)}>
-                ANÉIS
-              </Link>
-              <Link href="/produtos?category=pulseiras" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
                 PULSEIRAS
               </Link>
-              <Link href="/produtos?category=conjuntos" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
                 CONJUNTOS
+              </Link>
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+                BERLOQUES
+              </Link>
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+                ANÉIS
+              </Link>
+              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+                BRINCOS E PIERCING
               </Link>
             </nav>
 

@@ -957,11 +957,12 @@ export default function AdminPage() {
                             style={{ width: 'auto', padding: '0.85rem 1rem' }}
                           >
                             <option value="all">Todas as Categorias</option>
-                            <option value="brincos">Brincos</option>
-                            <option value="colares">Colares</option>
-                            <option value="aneis">Anéis</option>
+                            <option value="colares">Colares e chokers</option>
                             <option value="pulseiras">Pulseiras</option>
                             <option value="conjuntos">Conjuntos</option>
+                            <option value="berloques">Berloques</option>
+                            <option value="aneis">Anéis</option>
+                            <option value="brincos">Brincos e piercing</option>
                           </select>
                         </div>
                       </div>
@@ -1459,11 +1460,12 @@ export default function AdminPage() {
                       onChange={e => setProdForm({ ...prodForm, category_id: e.target.value })}
                       className="zom-input"
                     >
-                      <option value="1">Brincos</option>
-                      <option value="2">Colares</option>
-                      <option value="3">Anéis</option>
+                      <option value="2">Colares e chokers</option>
                       <option value="4">Pulseiras</option>
                       <option value="5">Conjuntos</option>
+                      <option value="6">Berloques</option>
+                      <option value="3">Anéis</option>
+                      <option value="1">Brincos e piercing</option>
                     </select>
                   </div>
 
