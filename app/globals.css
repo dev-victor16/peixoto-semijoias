@@ -3448,9 +3448,9 @@ button {
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 1.8rem;
+  gap: 2.2rem;
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.6rem 0 1rem;
 }
 
 .ref-category-card {
@@ -3465,11 +3465,11 @@ button {
   box-shadow: none;
   cursor: pointer;
   transition: transform 0.22s ease;
-  width: 96px;
+  width: 110px;
 }
 
 .ref-category-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   background: transparent;
   border: none;
   box-shadow: none;
@@ -3477,22 +3477,22 @@ button {
 
 /* Círculo Externo com borda no tom sofisticado da marca (Estilo Stories/Destaques Instagram) */
 .ref-category-circle-outer {
-  width: 82px;
-  height: 82px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  padding: 2.5px;
+  padding: 3px;
   background: linear-gradient(135deg, var(--rose) 0%, var(--slate-blue) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.65rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 4px 12px rgba(86, 107, 152, 0.15);
+  box-shadow: 0 4px 14px rgba(86, 107, 152, 0.16);
 }
 
 .ref-category-card:hover .ref-category-circle-outer {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(86, 107, 152, 0.25);
+  transform: scale(1.06);
+  box-shadow: 0 8px 22px rgba(86, 107, 152, 0.28);
 }
 
 /* Círculo Interno com espaço branco e corte da foto */
@@ -3513,13 +3513,13 @@ button {
 }
 
 .ref-category-name {
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--slate-blue-dark);
   letter-spacing: 0.01em;
   line-height: 1.25;
   text-align: center;
-  max-width: 94px;
+  max-width: 108px;
   word-wrap: break-word;
   transition: color 0.2s ease;
 }
@@ -3536,8 +3536,8 @@ button {
     justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 1.2rem;
-    padding: 0.2rem 1rem 0.8rem;
+    gap: 1.35rem;
+    padding: 0.4rem 1.2rem 1rem;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -3547,21 +3547,21 @@ button {
   }
 
   .ref-category-card {
-    min-width: 76px;
-    width: 76px;
+    min-width: 86px;
+    width: 86px;
     flex-shrink: 0;
     scroll-snap-align: start;
   }
 
   .ref-category-circle-outer {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 0.45rem;
+    width: 84px;
+    height: 84px;
+    margin-bottom: 0.5rem;
   }
 
   .ref-category-name {
-    font-size: 0.68rem;
-    max-width: 76px;
+    font-size: 0.72rem;
+    max-width: 86px;
   }
 }
 

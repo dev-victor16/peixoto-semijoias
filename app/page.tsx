@@ -167,7 +167,7 @@ export default async function HomePage() {
             {categoriesList.map(cat => (
               <Link
                 key={cat.slug}
-                href={`/#`}
+                href={`/categoria/${cat.slug}`}
                 className="ref-category-card"
                 title={`Ver categoria ${cat.name}`}
               >
