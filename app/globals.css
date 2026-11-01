@@ -3441,13 +3441,16 @@ button {
 }
 
 /* ========================================================
-   EXPLORE POR CATEGORIA & SEÇÕES HOME
+   EXPLORE POR CATEGORIA: ESTILO DESTAQUES DO INSTAGRAM
    ======================================================== */
 .ref-category-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.8rem;
   width: 100%;
+  padding: 0.5rem 0;
 }
 
 .ref-category-card {
@@ -3456,38 +3459,50 @@ button {
   align-items: center;
   text-align: center;
   text-decoration: none;
-  background: #ffffff;
-  border: 1px solid var(--ref-border);
-  border-radius: 16px;
-  padding: 1.1rem 0.6rem 1rem;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(86, 107, 152, 0.05);
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 0.22s ease;
+  width: 96px;
 }
 
 .ref-category-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--rose-dark);
-  box-shadow: 0 8px 24px rgba(86, 107, 152, 0.14);
+  transform: translateY(-3px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-.ref-category-img-wrapper {
-  width: 86px;
-  height: 86px;
+/* Círculo Externo com borda no tom sofisticado da marca (Estilo Stories/Destaques Instagram) */
+.ref-category-circle-outer {
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
-  overflow: hidden;
-  background-color: #f7f9fc;
-  border: 2px solid rgba(86, 107, 152, 0.12);
+  padding: 2.5px;
+  background: linear-gradient(135deg, var(--rose) 0%, var(--slate-blue) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.75rem;
-  transition: transform 0.25s ease, border-color 0.25s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.55rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 12px rgba(86, 107, 152, 0.15);
 }
 
-.ref-category-card:hover .ref-category-img-wrapper {
-  transform: scale(1.06);
-  border-color: var(--slate-blue);
+.ref-category-card:hover .ref-category-circle-outer {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(86, 107, 152, 0.25);
+}
+
+/* Círculo Interno com espaço branco e corte da foto */
+.ref-category-circle-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
 }
 
 .ref-category-img {
@@ -3498,59 +3513,55 @@ button {
 }
 
 .ref-category-name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--slate-blue-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.2rem;
-  line-height: 1.25;
-}
-
-.ref-category-tag {
-  font-size: 0.66rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  color: var(--ref-gray-text);
-  letter-spacing: 0.02em;
+  color: var(--slate-blue-dark);
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  text-align: center;
+  max-width: 94px;
+  word-wrap: break-word;
+  transition: color 0.2s ease;
 }
 
-@media (max-width: 990px) {
-  .ref-category-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.85rem;
-  }
+.ref-category-card:hover .ref-category-name {
+  color: var(--slate-blue);
+  font-weight: 700;
 }
 
-@media (max-width: 580px) {
+@media (max-width: 768px) {
   .ref-category-grid {
     display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding-bottom: 0.8rem;
-    gap: 0.75rem;
-    scrollbar-width: thin;
+    gap: 1.2rem;
+    padding: 0.2rem 1rem 0.8rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ref-category-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .ref-category-card {
-    min-width: 120px;
+    min-width: 76px;
+    width: 76px;
     flex-shrink: 0;
     scroll-snap-align: start;
-    padding: 1rem 0.5rem 0.85rem;
-    border-radius: 14px;
   }
 
-  .ref-category-img-wrapper {
-    width: 68px;
-    height: 68px;
-    margin-bottom: 0.55rem;
+  .ref-category-circle-outer {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 0.45rem;
   }
 
   .ref-category-name {
-    font-size: 0.72rem;
-  }
-
-  .ref-category-tag {
-    font-size: 0.58rem;
+    font-size: 0.68rem;
+    max-width: 76px;
   }
 }
 

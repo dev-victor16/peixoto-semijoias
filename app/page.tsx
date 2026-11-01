@@ -151,9 +151,9 @@ export default async function HomePage() {
       </section>
 
       {/* ========================================================
-          3. SEÇÃO: EXPLORE POR CATEGORIA
+          3. SEÇÃO: EXPLORE POR CATEGORIA (ESTILO DESTAQUE DO INSTAGRAM)
           ======================================================== */}
-      <section className="ref-collection-header-section" style={{ paddingTop: '1.2rem', paddingBottom: '1.4rem' }}>
+      <section id="explore-categorias" className="ref-collection-header-section" style={{ paddingTop: '1.4rem', paddingBottom: '1.2rem' }}>
         <div className="ref-container">
           <h2 className="ref-collection-title">
             EXPLORE POR CATEGORIA
@@ -161,7 +161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section style={{ padding: '0 0 3rem' }}>
+      <section style={{ padding: '0 0 2.8rem' }}>
         <div className="ref-container">
           <div className="ref-category-grid">
             {categoriesList.map(cat => (
@@ -171,16 +171,17 @@ export default async function HomePage() {
                 className="ref-category-card"
                 title={`Ver categoria ${cat.name}`}
               >
-                <div className="ref-category-img-wrapper">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="ref-category-img"
-                    loading="lazy"
-                  />
+                <div className="ref-category-circle-outer">
+                  <div className="ref-category-circle-inner">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="ref-category-img"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
-                <strong className="ref-category-name">{cat.name}</strong>
-                <span className="ref-category-tag">{cat.subtitle}</span>
+                <span className="ref-category-name">{cat.name}</span>
               </Link>
             ))}
           </div>
