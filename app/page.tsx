@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { getDb } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
@@ -22,7 +23,7 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
         .eq('published', 1)
         .order('sort_order', { ascending: true })
         .order('id', { ascending: true })
-        .limit(8);
+        .limit(20);
 
       if (!error && supaProds) {
         return supaProds.map(p => {
@@ -59,7 +60,7 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.published = 1
       ORDER BY p.sort_order ASC, p.id ASC
-      LIMIT 8
+      LIMIT 20
     `).all() as ProductCardData[];
 
     return products;
@@ -72,6 +73,66 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
 export default async function HomePage() {
   const products = await getHomeProducts();
 
+  // Categorias oficiais da loja para a seção "Explore por Categoria"
+  const categoriesList = [
+    {
+      name: 'Brincos',
+      slug: 'brincos',
+      subtitle: 'Prata 925',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z" />
+          <path d="M12 17v5" />
+          <circle cx="12" cy="14" r="1.5" />
+        </svg>
+      )
+    },
+    {
+      name: 'Colares',
+      slug: 'colares',
+      subtitle: 'Venezianas & Pingentes',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="9" r="6" />
+          <path d="M12 15v4" />
+          <circle cx="12" cy="20" r="1.5" />
+        </svg>
+      )
+    },
+    {
+      name: 'Anéis',
+      slug: 'aneis',
+      subtitle: 'Solitários & Cravejados',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="13" r="7" />
+          <path d="M9 6l3-3 3 3" />
+        </svg>
+      )
+    },
+    {
+      name: 'Pulseiras',
+      slug: 'pulseiras',
+      subtitle: 'Rivieras & Berloques',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 4a8 8 0 0 1 8 8" strokeDasharray="2 3" />
+        </svg>
+      )
+    },
+    {
+      name: 'Conjuntos',
+      slug: 'conjuntos',
+      subtitle: 'Combinações Perfeitas',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      )
+    }
+  ];
+
   return (
     <div className="ref-home-page">
       {/* Banner Carrossel Mobile Exclusivo (logo abaixo da barra superior) */}
@@ -83,29 +144,22 @@ export default async function HomePage() {
       <DesktopBannerCarousel />
 
       {/* ========================================================
-          2. TÍTULO DA VITRINE (Elegante, limpo e sem corações ou datas fictícias)
+          2. SEÇÃO: MAIS VENDIDAS
           ======================================================== */}
       <section className="ref-collection-header-section">
         <div className="ref-container">
           <h2 className="ref-collection-title">
-            SEMI JOIAS EM DESTAQUE
+            MAIS VENDIDAS
           </h2>
         </div>
       </section>
 
-      {/* ========================================================
-          3. VITRINE DE PRODUTOS
-          ======================================================== */}
       <section className="ref-products-section">
         <div className="ref-container ref-showcase-container">
-          <button type="button" className="ref-showcase-arrow arrow-left" aria-label="Voltar peças">
-            ‹
-          </button>
-
           <div className="ref-products-grid">
             {products.length > 0 ? (
-              products.slice(0, 4).map(p => (
-                <ProductCard key={p.id} product={p} />
+              products.map(p => (
+                <ProductCard key={`mais-vendida-${p.id}`} product={p} />
               ))
             ) : (
               <div className="ref-empty-showcase">
@@ -113,15 +167,70 @@ export default async function HomePage() {
               </div>
             )}
           </div>
-
-          <button type="button" className="ref-showcase-arrow arrow-right" aria-label="Avançar peças">
-            ›
-          </button>
         </div>
       </section>
 
       {/* ========================================================
-          4. FAIXA DE BENEFÍCIOS (Ícones SVG limpos e consistentes, sem emojis)
+          3. SEÇÃO: EXPLORE POR CATEGORIA
+          ======================================================== */}
+      <section className="ref-collection-header-section" style={{ paddingTop: '1.2rem', paddingBottom: '1.4rem' }}>
+        <div className="ref-container">
+          <h2 className="ref-collection-title">
+            EXPLORE POR CATEGORIA
+          </h2>
+        </div>
+      </section>
+
+      <section style={{ padding: '0 0 3rem' }}>
+        <div className="ref-container">
+          <div className="ref-category-grid">
+            {categoriesList.map(cat => (
+              <Link
+                key={cat.slug}
+                href={`/#`}
+                className="ref-category-card"
+                title={`Ver categoria ${cat.name}`}
+              >
+                <div className="ref-category-icon-wrapper">
+                  {cat.icon}
+                </div>
+                <strong className="ref-category-name">{cat.name}</strong>
+                <span className="ref-category-tag">{cat.subtitle}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          4. SEÇÃO: NOVIDADES
+          ======================================================== */}
+      <section className="ref-collection-header-section" style={{ paddingTop: '1.2rem', paddingBottom: '1.2rem' }}>
+        <div className="ref-container">
+          <h2 className="ref-collection-title">
+            NOVIDADES
+          </h2>
+        </div>
+      </section>
+
+      <section className="ref-products-section">
+        <div className="ref-container ref-showcase-container">
+          <div className="ref-products-grid">
+            {products.length > 0 ? (
+              [...products].reverse().map(p => (
+                <ProductCard key={`novidade-${p.id}`} product={p} />
+              ))
+            ) : (
+              <div className="ref-empty-showcase">
+                <p>Nenhuma novidade cadastrada no momento.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          5. FAIXA DE BENEFÍCIOS (Ícones SVG limpos e consistentes, sem emojis)
           ======================================================== */}
       <section className="ref-benefits-section">
         <div className="ref-container">
