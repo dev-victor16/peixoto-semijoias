@@ -156,7 +156,7 @@ export default function AdminPage() {
     try {
       const [dashRes, prodRes, expRes, ordRes, setRes] = await Promise.all([
         fetch('/api/dashboard'),
-        fetch('/api/products?limit=100'),
+        fetch('/api/products?admin=1&limit=200'),
         fetch('/api/expenses'),
         fetch('/api/orders?limit=100'),
         fetch('/api/settings')
