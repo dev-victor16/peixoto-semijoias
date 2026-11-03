@@ -41,7 +41,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
   try {
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { data, error } = await supabase
+      let queryRes = await supabase
         .from('products')
         .select(`
           id, name, slug, sku, price, promo_price, is_promo, description,
@@ -52,6 +52,23 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
         .eq('slug', decodedSlug)
         .eq('published', 1)
         .maybeSingle();
+
+      // Se a coluna 'sizes' não existir no schema remoto do Supabase, refaz a busca sem ela
+      if (queryRes.error && queryRes.error.code === '42703') {
+        queryRes = await supabase
+          .from('products')
+          .select(`
+            id, name, slug, sku, price, promo_price, is_promo, description,
+            materials, care_instructions, stock_quantity, published,
+            categories (id, name, slug),
+            product_images (id, url, alt, is_primary, sort_order)
+          `)
+          .eq('slug', decodedSlug)
+          .eq('published', 1)
+          .maybeSingle();
+      }
+
+      const { data, error } = queryRes;
 
       if (!error && data) {
         const cat = Array.isArray(data.categories) ? data.categories[0] : data.categories as any;
@@ -77,7 +94,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
           description: data.description || '',
           materials: data.materials || 'Semijoia banhada a prata 925 com acabamento nobre e tecnologia antialérgica.',
           care_instructions: data.care_instructions || 'Evite contato com água do mar, piscina, perfumes e produtos químicos para preservar o brilho.',
-          sizes: data.sizes || undefined,
+          sizes: (data as any).sizes || undefined,
           stock_quantity: data.stock_quantity ?? 10,
           category_name: cat?.name || 'Semijoias',
           category_slug: cat?.slug || 'semijoias',

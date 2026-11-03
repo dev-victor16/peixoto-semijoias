@@ -16,14 +16,14 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
       const { data: supaProds, error } = await supabase
         .from('products')
         .select(`
-          id, name, slug, price, promo_price, is_promo, description, stock_quantity, sort_order,
+          id, name, slug, price, promo_price, is_promo, featured, is_new, description, stock_quantity, sort_order,
           categories (name, slug),
           product_images (url, is_primary, sort_order)
         `)
         .eq('published', 1)
         .order('sort_order', { ascending: true })
         .order('id', { ascending: true })
-        .limit(20);
+        .limit(50);
 
       if (!error && supaProds) {
         return supaProds.map(p => {
@@ -39,11 +39,13 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
             price: p.price,
             promo_price: p.promo_price,
             is_promo: p.is_promo,
+            featured: p.featured ?? 0,
+            is_new: p.is_new ?? 0,
             short_description: p.description,
             stock_quantity: p.stock_quantity,
             category_name: cat?.name || '',
             category_slug: cat?.slug || '',
-            image_url: primaryImg || firstImg || null
+            image_url: primaryImg || firstImg || undefined
           } as ProductCardData;
         });
       }
@@ -53,14 +55,14 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
     const db = getDb();
     const products = db.prepare(`
       SELECT 
-        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.description as short_description, p.stock_quantity,
+        p.id, p.name, p.slug, p.price, p.promo_price, p.is_promo, p.featured, p.is_new, p.description as short_description, p.stock_quantity,
         c.name as category_name, c.slug as category_slug,
         (SELECT url FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as image_url
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.published = 1
       ORDER BY p.sort_order ASC, p.id ASC
-      LIMIT 20
+      LIMIT 50
     `).all() as ProductCardData[];
 
     return products;
@@ -72,6 +74,10 @@ async function getHomeProducts(): Promise<ProductCardData[]> {
 
 export default async function HomePage() {
   const products = await getHomeProducts();
+
+  // Filtragem dos grupos de acordo com a seleção no admin
+  const bestSellers = products.filter(p => p.featured === 1);
+  const newArrivals = products.filter(p => p.is_new === 1);
 
   // Categorias oficiais da loja para a seção "Explore por Categoria"
   const categoriesList = [
@@ -137,13 +143,13 @@ export default async function HomePage() {
       <section className="ref-products-section">
         <div className="ref-container ref-showcase-container">
           <div className="ref-products-grid">
-            {products.length > 0 ? (
-              products.map(p => (
+            {bestSellers.length > 0 ? (
+              bestSellers.map(p => (
                 <ProductCard key={`mais-vendida-${p.id}`} product={p} />
               ))
             ) : (
               <div className="ref-empty-showcase">
-                <p>Nenhuma peça cadastrada no momento.</p>
+                <p>Nenhuma peça selecionada para Mais Vendidas no momento.</p>
               </div>
             )}
           </div>
@@ -202,13 +208,13 @@ export default async function HomePage() {
       <section className="ref-products-section">
         <div className="ref-container ref-showcase-container">
           <div className="ref-products-grid">
-            {products.length > 0 ? (
-              [...products].reverse().map(p => (
+            {newArrivals.length > 0 ? (
+              newArrivals.map(p => (
                 <ProductCard key={`novidade-${p.id}`} product={p} />
               ))
             ) : (
               <div className="ref-empty-showcase">
-                <p>Nenhuma novidade cadastrada no momento.</p>
+                <p>Nenhuma peça selecionada para Novidades no momento.</p>
               </div>
             )}
           </div>

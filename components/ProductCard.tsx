@@ -10,6 +10,8 @@ export interface ProductCardData {
   price: number;
   promo_price?: number | null;
   is_promo?: number;
+  featured?: number;
+  is_new?: number;
   short_description?: string;
   image_url?: string;
   category_name?: string;
