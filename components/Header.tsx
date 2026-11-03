@@ -198,25 +198,25 @@ export default function Header() {
             </form>
 
             <nav className="ref-drawer-links" aria-label="Links do catálogo">
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/produtos" onClick={() => setMobileMenuOpen(false)}>
                 TODAS AS PEÇAS
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/colares-e-chokers" onClick={() => setMobileMenuOpen(false)}>
                 COLARES E CHOKERS
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/pulseiras" onClick={() => setMobileMenuOpen(false)}>
                 PULSEIRAS
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/conjuntos" onClick={() => setMobileMenuOpen(false)}>
                 CONJUNTOS
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/berloques" onClick={() => setMobileMenuOpen(false)}>
                 BERLOQUES
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/aneis" onClick={() => setMobileMenuOpen(false)}>
                 ANÉIS
               </Link>
-              <Link href="/#explore-categorias" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/categoria/brincos-e-piercing" onClick={() => setMobileMenuOpen(false)}>
                 BRINCOS E PIERCING
               </Link>
             </nav>

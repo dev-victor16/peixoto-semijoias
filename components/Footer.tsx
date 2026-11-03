@@ -45,12 +45,13 @@ export default function Footer() {
         <div className="ref-footer-col">
           <h4 className="ref-footer-heading">CATÁLOGO</h4>
           <ul className="ref-footer-links">
-            <li><Link href="/">DESTAQUES</Link></li>
-            <li><Link href="/produtos?category=brincos">BRINCOS</Link></li>
-            <li><Link href="/produtos?category=colares">COLARES</Link></li>
-            <li><Link href="/produtos?category=aneis">ANÉIS</Link></li>
-            <li><Link href="/produtos?category=pulseiras">PULSEIRAS</Link></li>
-            <li><Link href="/produtos?category=conjuntos">CONJUNTOS</Link></li>
+            <li><Link href="/produtos">TODAS AS PEÇAS</Link></li>
+            <li><Link href="/categoria/brincos-e-piercing">BRINCOS E PIERCING</Link></li>
+            <li><Link href="/categoria/colares-e-chokers">COLARES E CHOKERS</Link></li>
+            <li><Link href="/categoria/aneis">ANÉIS</Link></li>
+            <li><Link href="/categoria/pulseiras">PULSEIRAS</Link></li>
+            <li><Link href="/categoria/conjuntos">CONJUNTOS</Link></li>
+            <li><Link href="/categoria/berloques">BERLOQUES</Link></li>
           </ul>
         </div>
 

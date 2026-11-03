@@ -11,17 +11,38 @@ interface CategoryPageProps {
 }
 
 async function getCategoryData(slug: string) {
-  const decodedSlug = decodeURIComponent(slug);
+  const decodedSlug = decodeURIComponent(slug).toLowerCase().trim();
 
   // 1. Tenta Supabase
   try {
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { data: cat } = await supabase
+      let catRes = await supabase
         .from('categories')
         .select('*')
         .or(`slug.eq.${decodedSlug},name.ilike.%${decodedSlug}%`)
         .maybeSingle();
+
+      // Mapeamento inteligente para termos comuns
+      if (!catRes.data) {
+        let catIdFallback: number | null = null;
+        if (decodedSlug.includes('brinco') || decodedSlug.includes('piercing')) catIdFallback = 1;
+        else if (decodedSlug.includes('colar') || decodedSlug.includes('choker')) catIdFallback = 2;
+        else if (decodedSlug.includes('anel') || decodedSlug.includes('aneis')) catIdFallback = 3;
+        else if (decodedSlug.includes('pulseira')) catIdFallback = 4;
+        else if (decodedSlug.includes('conjunto')) catIdFallback = 5;
+        else if (decodedSlug.includes('berloque')) catIdFallback = 6;
+
+        if (catIdFallback) {
+          catRes = await supabase
+            .from('categories')
+            .select('*')
+            .eq('id', catIdFallback)
+            .maybeSingle();
+        }
+      }
+
+      const cat = catRes.data;
 
       if (cat) {
         const { data: supaProds } = await supabase

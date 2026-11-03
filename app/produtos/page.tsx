@@ -27,11 +27,30 @@ async function getProdutos(categorySlug?: string, search?: string): Promise<{ pr
       let title = 'Catálogo Oficial de Semijoias';
 
       if (categorySlug) {
-        const { data: cat } = await supabase
+        const cleanCat = categorySlug.toLowerCase().trim();
+        let cat = (await supabase
           .from('categories')
           .select('id, name')
-          .or(`slug.eq.${categorySlug},name.ilike.%${categorySlug}%`)
-          .maybeSingle();
+          .or(`slug.eq.${cleanCat},name.ilike.%${cleanCat}%`)
+          .maybeSingle()).data;
+
+        if (!cat) {
+          let catIdFallback: number | null = null;
+          if (cleanCat.includes('brinco') || cleanCat.includes('piercing')) catIdFallback = 1;
+          else if (cleanCat.includes('colar') || cleanCat.includes('choker')) catIdFallback = 2;
+          else if (cleanCat.includes('anel') || cleanCat.includes('aneis')) catIdFallback = 3;
+          else if (cleanCat.includes('pulseira')) catIdFallback = 4;
+          else if (cleanCat.includes('conjunto')) catIdFallback = 5;
+          else if (cleanCat.includes('berloque')) catIdFallback = 6;
+
+          if (catIdFallback) {
+            cat = (await supabase
+              .from('categories')
+              .select('id, name')
+              .eq('id', catIdFallback)
+              .maybeSingle()).data;
+          }
+        }
 
         if (cat) {
           query = query.eq('category_id', cat.id);
