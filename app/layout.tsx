@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 
+import MaintenanceWrapper from '@/components/MaintenanceWrapper';
+
 export const metadata: Metadata = {
   title: 'Peixoto Semi Joias | Elegância e Sofisticação',
   description: 'Semi joias com design autoral, banho de ouro 18k e prata 925 com garantia. Escolha suas peças e finalize seu pedido diretamente pelo WhatsApp.',
@@ -32,12 +34,14 @@ export default function RootLayout({
       </head>
       <body>
         <CartProvider>
-          <Header />
-          <CartDrawer />
-          <main className="main-content">
-            {children}
-          </main>
-          <Footer />
+          <MaintenanceWrapper>
+            <Header />
+            <CartDrawer />
+            <main className="main-content">
+              {children}
+            </main>
+            <Footer />
+          </MaintenanceWrapper>
         </CartProvider>
       </body>
     </html>

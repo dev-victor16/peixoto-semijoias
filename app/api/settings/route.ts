@@ -8,8 +8,12 @@ export async function GET() {
     // 1. Supabase first
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { data, error } = await supabase.from('settings').select('*');
-      if (!error && data) {
+      let { data, error } = await supabase.from('store_settings').select('*');
+      if (error || !data) {
+        const retry = await supabase.from('settings').select('*');
+        data = retry.data;
+      }
+      if (data) {
         const settingsMap: Record<string, string> = {};
         data.forEach((row: { key: string; value: string }) => {
           settingsMap[row.key] = row.value;
@@ -40,7 +44,12 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString()
       }));
 
-      await supabase.from('settings').upsert(upserts, { onConflict: 'key' });
+      const { error } = await supabase.from('store_settings').upsert(upserts, { onConflict: 'key' });
+      if (error) {
+        try {
+          await supabase.from('settings').upsert(upserts, { onConflict: 'key' });
+        } catch {}
+      }
       logAdminAction(user.userId, user.username, 'update_settings', 'settings', undefined, Object.keys(body).join(', '));
       return NextResponse.json({ success: true });
     }

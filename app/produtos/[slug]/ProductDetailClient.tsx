@@ -21,6 +21,7 @@ interface ProductDetailData {
   description?: string;
   materials?: string;
   care_instructions?: string;
+  sizes?: string;
   stock_quantity: number;
   category_name?: string;
   category_slug?: string;
@@ -34,6 +35,19 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const [added, setAdded] = useState(false);
   const [stockError, setStockError] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  // Parse available sizes
+  const availableSizes = React.useMemo(() => {
+    if (!product.sizes || !product.sizes.trim()) return [];
+    return product.sizes
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  }, [product.sizes]);
+
+  const [selectedSize, setSelectedSize] = useState<string>(() => {
+    return availableSizes.length > 0 ? availableSizes[0] : '';
+  });
 
   const images = product.images.length > 0
     ? product.images
@@ -70,6 +84,18 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
   const handleAddToCart = () => {
     setStockError(null);
+
+    if (availableSizes.length > 0 && !selectedSize) {
+      setStockError('Por favor, selecione um tamanho antes de adicionar à sacola.');
+      setTimeout(() => setStockError(null), 3000);
+      return;
+    }
+
+    const variationDetails = [
+      selectedSize ? `Tamanho: ${selectedSize}` : null,
+      'Prata 925 (Antialérgica)'
+    ].filter(Boolean).join(' • ');
+
     const result = addItem({
       product_id: product.id,
       product_name: product.name,
@@ -77,8 +103,8 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       unit_price: effectivePrice,
       quantity: quantity,
       image: currentImage.url,
-      variation_type: 'Material',
-      variation_value: 'Prata 925 (Antialérgica)',
+      variation_type: selectedSize ? 'Tamanho' : 'Material',
+      variation_value: variationDetails,
       stock_available: product.stock_quantity
     });
 
@@ -217,6 +243,46 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             </div>
           </div>
         </div>
+
+        {/* Seletor de Tamanhos (se a peça possuir tamanhos cadastrados) */}
+        {availableSizes.length > 0 && (
+          <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                Tamanho: <strong style={{ color: '#566b98' }}>{selectedSize || 'Selecione'}</strong>
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {availableSizes.map(size => {
+                const isSelected = selectedSize === size;
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setSelectedSize(size)}
+                    style={{
+                      minWidth: '42px',
+                      height: '38px',
+                      padding: '0 0.85rem',
+                      borderRadius: '8px',
+                      border: isSelected ? '2px solid #566b98' : '1px solid #e2e8f0',
+                      background: isSelected ? 'rgba(86, 107, 152, 0.08)' : '#ffffff',
+                      color: isSelected ? '#566b98' : '#334155',
+                      fontWeight: isSelected ? 600 : 500,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      outline: 'none',
+                      boxShadow: isSelected ? '0 2px 6px rgba(86, 107, 152, 0.15)' : 'none'
+                    }}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Quantidade e Botões de Compra */}
         <div className="ref-detail-actions">

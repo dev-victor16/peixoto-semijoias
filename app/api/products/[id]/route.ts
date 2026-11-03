@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const {
       name, description, sku, category_id, price, promo_price, promo_start, promo_end,
       cost_price, stock_quantity, low_stock_threshold, materials, care_instructions,
-      supplier, weight, dimensions, published, featured, is_new, is_promo, images, variations
+      supplier, sizes, weight, dimensions, published, featured, is_new, is_promo, images, variations
     } = body;
 
     // 1. Supabase first
@@ -182,6 +182,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (materials !== undefined) updateData.materials = materials;
       if (care_instructions !== undefined) updateData.care_instructions = care_instructions;
       if (supplier !== undefined) updateData.supplier = supplier;
+      if (sizes !== undefined) updateData.sizes = sizes;
       if (weight !== undefined) updateData.weight = weight;
       if (dimensions !== undefined) updateData.dimensions = dimensions;
       if (published !== undefined) updateData.published = published ? 1 : 0;
@@ -196,9 +197,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         .select('*')
         .single();
 
-      // If supplier column does not exist on Supabase, retry without supplier
-      if (updateErr && (updateErr.message?.includes('supplier') || updateErr.code === 'PGRST204')) {
+      // If supplier or sizes column does not exist on Supabase, retry without them
+      if (updateErr && (updateErr.message?.includes('supplier') || updateErr.message?.includes('sizes') || updateErr.code === 'PGRST204')) {
         delete updateData.supplier;
+        delete updateData.sizes;
         const retry = await supabase
           .from('products')
           .update(updateData)
@@ -291,6 +293,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           materials = COALESCE(?, materials),
           care_instructions = COALESCE(?, care_instructions),
           supplier = COALESCE(?, supplier),
+          sizes = ?,
           weight = COALESCE(?, weight),
           dimensions = COALESCE(?, dimensions),
           published = COALESCE(?, published),
@@ -309,6 +312,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         stock_quantity ?? null, low_stock_threshold ?? null,
         materials ?? null, care_instructions ?? null,
         supplier !== undefined ? supplier : (existing.supplier ?? null),
+        sizes !== undefined ? sizes : (existing.sizes ?? null),
         weight ?? null, dimensions ?? null,
         published !== undefined ? (published ? 1 : 0) : null,
         featured !== undefined ? (featured ? 1 : 0) : null,

@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     const {
       name, description, sku, category_id, price, promo_price, promo_start, promo_end,
       cost_price, stock_quantity, low_stock_threshold, materials, care_instructions,
-      supplier, weight, dimensions, published, featured, is_new, is_promo, images, variations
+      supplier, sizes, weight, dimensions, published, featured, is_new, is_promo, images, variations
     } = body;
 
     if (!name || !sku || price === undefined) {
@@ -194,6 +194,7 @@ export async function POST(request: NextRequest) {
         materials: materials || null,
         care_instructions: care_instructions || null,
         supplier: supplier || null,
+        sizes: sizes || null,
         weight: weight || null,
         dimensions: dimensions || null,
         published: published !== undefined ? (published ? 1 : 0) : 1,
@@ -208,9 +209,10 @@ export async function POST(request: NextRequest) {
         .select('*')
         .single();
 
-      // If supplier column does not exist yet on Supabase schema, retry safely without it
-      if (insertErr && (insertErr.message?.includes('supplier') || insertErr.code === 'PGRST204')) {
+      // If supplier or sizes column does not exist yet on Supabase schema, retry safely without it
+      if (insertErr && (insertErr.message?.includes('supplier') || insertErr.message?.includes('sizes') || insertErr.code === 'PGRST204')) {
         delete insertPayload.supplier;
+        delete insertPayload.sizes;
         const retry = await supabase
           .from('products')
           .insert(insertPayload)
@@ -262,13 +264,13 @@ export async function POST(request: NextRequest) {
     const insertProduct = db.transaction(() => {
       const result = db.prepare(`
         INSERT INTO products (name, slug, description, sku, category_id, price, promo_price, promo_start, promo_end,
-          cost_price, stock_quantity, low_stock_threshold, materials, care_instructions, supplier, weight, dimensions,
+          cost_price, stock_quantity, low_stock_threshold, materials, care_instructions, supplier, sizes, weight, dimensions,
           published, featured, is_new, is_promo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         name, slug, description || null, sku, category_id || null, price, promo_price || null,
         promo_start || null, promo_end || null, cost_price || null, stock_quantity || 0,
-        low_stock_threshold || 3, materials || null, care_instructions || null, supplier || null,
+        low_stock_threshold || 3, materials || null, care_instructions || null, supplier || null, sizes || null,
         weight || null, dimensions || null, published ? 1 : 0, featured ? 1 : 0, is_new ? 1 : 0, is_promo ? 1 : 0
       );
       const productId = result.lastInsertRowid as number;

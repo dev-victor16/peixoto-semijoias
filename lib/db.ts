@@ -72,6 +72,7 @@ function initializeSchema(db: Database.Database) {
       materials TEXT,
       care_instructions TEXT,
       supplier TEXT,
+      sizes TEXT,
       weight TEXT,
       dimensions TEXT,
       published INTEGER DEFAULT 0,
@@ -231,6 +232,9 @@ function initializeSchema(db: Database.Database) {
     const prodCols = db.prepare("PRAGMA table_info(products)").all().map((c: any) => c.name);
     if (!prodCols.includes('supplier')) {
       db.prepare("ALTER TABLE products ADD COLUMN supplier TEXT").run();
+    }
+    if (!prodCols.includes('sizes')) {
+      db.prepare("ALTER TABLE products ADD COLUMN sizes TEXT").run();
     }
 
     // Atualização das categorias oficiais da Use Peixoto

@@ -44,9 +44,11 @@ interface ProductItem {
   category_name?: string;
   materials?: string;
   supplier?: string;
+  sizes?: string;
   image?: string;
   primary_image?: string;
   first_image?: string;
+  images?: Array<{ url: string; alt?: string; is_primary?: number; sort_order?: number }>;
 }
 
 interface ExpenseItem {
@@ -104,7 +106,10 @@ export default function AdminPage() {
     stock_quantity: '1',
     materials: 'Banho a Prata 925 (Antialérgica)',
     supplier: '',
+    sizes: '',
+    has_sizes: true,
     image_url: '',
+    images_list: [] as string[],
     description: '',
     published: true,
   });
@@ -125,7 +130,8 @@ export default function AdminPage() {
     store_name: '',
     store_description: '',
     shipping_info: '',
-    warranty_info: ''
+    warranty_info: '',
+    maintenance_mode: false
   });
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
@@ -184,7 +190,8 @@ export default function AdminPage() {
           store_name: sData.store_name || '',
           store_description: sData.store_description || '',
           shipping_info: sData.shipping_info || '',
-          warranty_info: sData.warranty_info || ''
+          warranty_info: sData.warranty_info || '',
+          maintenance_mode: sData.maintenance_mode === 'true' || sData.maintenance_mode === '1'
         });
       }
     } catch (err) {
@@ -212,7 +219,10 @@ export default function AdminPage() {
       stock_quantity: '1',
       materials: 'Banho a Prata 925 (Antialérgica)',
       supplier: '',
+      sizes: '',
+      has_sizes: true,
       image_url: '',
+      images_list: [],
       description: '',
       published: true
     });
@@ -221,6 +231,16 @@ export default function AdminPage() {
 
   const openEditProduct = (prod: ProductItem) => {
     setEditingProduct(prod);
+    const existingImgs: string[] = [];
+    if (prod.images && prod.images.length > 0) {
+      prod.images.forEach(img => { if (img.url) existingImgs.push(img.url); });
+    } else {
+      const single = prod.image || prod.primary_image || prod.first_image;
+      if (single) existingImgs.push(single);
+    }
+
+    const hasSizes = !!(prod.sizes && prod.sizes.trim().length > 0);
+
     setProdForm({
       name: prod.name,
       sku: prod.sku,
@@ -230,7 +250,10 @@ export default function AdminPage() {
       stock_quantity: prod.stock_quantity?.toString() || '0',
       materials: prod.materials || 'Banho a Prata 925 (Antialérgica)',
       supplier: prod.supplier || '',
-      image_url: prod.image || prod.primary_image || prod.first_image || '',
+      sizes: prod.sizes || '',
+      has_sizes: hasSizes,
+      image_url: existingImgs[0] || '',
+      images_list: existingImgs,
       description: '',
       published: prod.published === 1
     });
@@ -238,44 +261,61 @@ export default function AdminPage() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const fileName = (file.name || '').toLowerCase();
-    const isImage = file.type.startsWith('image/') || fileName.endsWith('.heic') || fileName.endsWith('.heif');
-    if (!isImage) {
-      showToast('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP ou HEIC).', 'error');
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) {
-      showToast('A imagem deve ter no máximo 20MB.', 'error');
-      return;
-    }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = (file.name || '').toLowerCase();
+        const isImage = file.type.startsWith('image/') || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+        if (!isImage) continue;
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Falha ao enviar imagem');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) uploadedUrls.push(data.url);
+        }
       }
 
-      const data = await res.json();
-      setProdForm(prev => ({ ...prev, image_url: data.url }));
-      showToast('Foto da semijoia carregada com sucesso!');
+      if (uploadedUrls.length > 0) {
+        setProdForm(prev => {
+          const combined = [...prev.images_list, ...uploadedUrls];
+          return {
+            ...prev,
+            images_list: combined,
+            image_url: combined[0] || ''
+          };
+        });
+        showToast(`${uploadedUrls.length} foto(s) adicionada(s) com sucesso!`);
+      } else {
+        showToast('Nenhuma imagem pôde ser enviada. Verifique o formato e tente novamente.', 'error');
+      }
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Erro no envio da foto', 'error');
     } finally {
       setIsUploading(false);
+      e.target.value = '';
     }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setProdForm(prev => {
+      const updated = prev.images_list.filter((_, idx) => idx !== indexToRemove);
+      return {
+        ...prev,
+        images_list: updated,
+        image_url: updated[0] || ''
+      };
+    });
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -284,6 +324,20 @@ export default function AdminPage() {
       const isEdit = !!editingProduct;
       const url = isEdit ? `/api/products/${editingProduct.id}` : '/api/products';
       const method = isEdit ? 'PUT' : 'POST';
+
+      const finalSizes = prodForm.has_sizes && prodForm.sizes.trim() ? prodForm.sizes.trim() : null;
+
+      // Monta lista de fotos
+      let finalImages = prodForm.images_list.map((u, idx) => ({
+        url: u,
+        alt: prodForm.name,
+        sort_order: idx,
+        is_primary: idx === 0 ? 1 : 0
+      }));
+
+      if (finalImages.length === 0 && prodForm.image_url.trim()) {
+        finalImages = [{ url: prodForm.image_url.trim(), alt: prodForm.name, sort_order: 0, is_primary: 1 }];
+      }
 
       const bodyData: Record<string, unknown> = {
         name: prodForm.name,
@@ -294,13 +348,11 @@ export default function AdminPage() {
         stock_quantity: parseInt(prodForm.stock_quantity) || 0,
         materials: prodForm.materials,
         supplier: prodForm.supplier.trim() || null,
+        sizes: finalSizes,
         description: prodForm.description,
-        published: prodForm.published ? 1 : 0
+        published: prodForm.published ? 1 : 0,
+        images: finalImages
       };
-
-      if (prodForm.image_url.trim()) {
-        bodyData.images = [{ url: prodForm.image_url.trim(), alt: prodForm.name }];
-      }
 
       const res = await fetch(url, {
         method,
@@ -480,9 +532,15 @@ export default function AdminPage() {
       const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settingsForm)
+        body: JSON.stringify({
+          ...settingsForm,
+          maintenance_mode: settingsForm.maintenance_mode ? 'true' : 'false'
+        })
       });
-      if (res.ok) showToast('Configurações salvas!');
+      if (res.ok) {
+        showToast('Configurações salvas!');
+        loadAllData(true);
+      }
     } catch {
       showToast('Erro ao salvar', 'error');
     }
@@ -1349,6 +1407,51 @@ export default function AdminPage() {
                     </div>
 
                     <form onSubmit={handleSaveSettings} className="admin-form">
+                      {/* CONTROLE DE MODO MANUTENÇÃO (PAUSAR LOJA) */}
+                      <div style={{
+                        padding: '1.25rem',
+                        borderRadius: '16px',
+                        border: settingsForm.maintenance_mode ? '2px solid #f59e0b' : '1px solid #e2e8f0',
+                        backgroundColor: settingsForm.maintenance_mode ? 'rgba(245, 158, 11, 0.06)' : '#f8fafc',
+                        marginBottom: '1.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <span className="material-symbols-outlined" style={{ color: settingsForm.maintenance_mode ? '#d97706' : '#64748b', fontSize: '1.5rem' }}>
+                              {settingsForm.maintenance_mode ? 'construction' : 'storefront'}
+                            </span>
+                            <div>
+                              <strong style={{ fontSize: '0.95rem', color: '#1e293b' }}>
+                                Pausar Loja / Modo Manutenção
+                              </strong>
+                              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                                Ative para esconder a loja temporariamente enquanto cadastra novas peças. O painel admin continua 100% liberado.
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSettingsForm(prev => ({ ...prev, maintenance_mode: !prev.maintenance_mode }))}
+                            style={{
+                              padding: '0.5rem 1rem',
+                              borderRadius: '999px',
+                              fontWeight: 600,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              border: 'none',
+                              transition: 'all 0.2s',
+                              backgroundColor: settingsForm.maintenance_mode ? '#f59e0b' : '#e2e8f0',
+                              color: settingsForm.maintenance_mode ? '#ffffff' : '#475569'
+                            }}
+                          >
+                            {settingsForm.maintenance_mode ? 'PAUSADO (ATIVO)' : 'LOJA ONLINE (DESATIVADO)'}
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="zom-input-group">
                         <label className="zom-input-label">Nome Oficial da Marca</label>
                         <input
@@ -1544,9 +1647,72 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* 3. Foto da Peça */}
+                {/* 3. Tamanhos Disponíveis / Botão Sem Tamanho */}
+                <div style={{
+                  padding: '1rem',
+                  borderRadius: '16px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  marginBottom: '1.2rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                    <label className="zom-input-label" style={{ margin: 0, fontWeight: 600 }}>
+                      Tamanhos Disponíveis
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setProdForm(prev => ({
+                        ...prev,
+                        has_sizes: !prev.has_sizes,
+                        sizes: !prev.has_sizes ? prev.sizes : ''
+                      }))}
+                      style={{
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        border: 'none',
+                        transition: 'all 0.15s ease',
+                        backgroundColor: !prodForm.has_sizes ? '#e2e8f0' : 'rgba(86, 107, 152, 0.15)',
+                        color: !prodForm.has_sizes ? '#64748b' : '#566b98'
+                      }}
+                    >
+                      {!prodForm.has_sizes ? '✓ Marcado: Sem tamanho' : 'Definir como: Sem tamanho'}
+                    </button>
+                  </div>
+
+                  {prodForm.has_sizes ? (
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Ex: 14, 16, 18, 20 ou 45cm, 50cm (separe por vírgula)"
+                        value={prodForm.sizes}
+                        onChange={e => setProdForm({ ...prodForm, sizes: e.target.value })}
+                        className="zom-input"
+                        style={{ backgroundColor: '#ffffff' }}
+                      />
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginTop: '0.35rem' }}>
+                        Separe os tamanhos por vírgula. Se a peça não tiver variação de tamanho, clique no botão &ldquo;Sem tamanho&rdquo; acima.
+                      </span>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic', padding: '0.25rem 0' }}>
+                      Esta semijoia não exigirá escolha de tamanho na página do produto.
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Fotos da Peça (Carrossel / Múltiplas Imagens) */}
                 <div className="zom-input-group">
-                  <label className="zom-input-label">Foto da Semijoia</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label className="zom-input-label" style={{ margin: 0 }}>
+                      Fotos da Semijoia ({prodForm.images_list.length} adicionada{prodForm.images_list.length === 1 ? '' : 's'})
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      A primeira foto será a capa principal
+                    </span>
+                  </div>
                   
                   {/* Card de Upload Direto */}
                   <div style={{
@@ -1562,6 +1728,7 @@ export default function AdminPage() {
                     <input
                       type="file"
                       accept="image/*,.heic,.HEIC,.heif,.HEIF"
+                      multiple
                       id="admin-product-file-upload"
                       onChange={handleImageUpload}
                       style={{
@@ -1592,65 +1759,109 @@ export default function AdminPage() {
                         </span>
                       </div>
                       <strong style={{ fontSize: '0.82rem', color: '#1a2234' }}>
-                        {isUploading ? 'Convertendo e enviando foto...' : 'Escolher foto do celular ou computador'}
+                        {isUploading ? 'Convertendo e enviando fotos...' : 'Clique para adicionar uma ou várias fotos'}
                       </strong>
                       <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        Formatos JPG, PNG, WEBP ou HEIC (iPhone) até 20MB
+                        Selecione múltiplas fotos de uma vez (JPG, PNG, WEBP ou HEIC) até 20MB cada
                       </span>
                     </div>
                   </div>
 
-                  {/* Input Alternativo de URL & Miniatura */}
-                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                  {/* Grade de Miniaturas / Carrossel de Fotos */}
+                  {prodForm.images_list.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
+                      {prodForm.images_list.map((url, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            position: 'relative',
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            border: idx === 0 ? '2px solid #566b98' : '1px solid #e2e8f0',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
+                          }}
+                        >
+                          <img
+                            src={url}
+                            alt={`Foto ${idx + 1}`}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                          {idx === 0 && (
+                            <span style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              background: '#566b98',
+                              color: '#fff',
+                              fontSize: '9px',
+                              textAlign: 'center',
+                              fontWeight: 600,
+                              padding: '1px 0'
+                            }}>
+                              CAPA
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            style={{
+                              position: 'absolute',
+                              top: '2px',
+                              right: '2px',
+                              background: 'rgba(225, 29, 72, 0.9)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '18px',
+                              height: '18px',
+                              fontSize: '10px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Remover foto"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input Alternativo de URL */}
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <input
                       type="text"
-                      placeholder="Ou cole o link da foto (opcional)"
+                      placeholder="Ou adicione por link de imagem..."
                       value={prodForm.image_url}
                       onChange={e => setProdForm({ ...prodForm, image_url: e.target.value })}
                       className="zom-input"
                       style={{ flex: 1 }}
                     />
-                    {prodForm.image_url.trim() ? (
-                      <div style={{ position: 'relative', flexShrink: 0 }}>
-                        <img
-                          src={prodForm.image_url}
-                          alt="Prévia"
-                          className="admin-thumb"
-                          style={{ width: '48px', height: '48px' }}
-                          onError={e => {
-                            (e.target as HTMLImageElement).src = '/logo.png';
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setProdForm({ ...prodForm, image_url: '' })}
-                          style={{
-                            position: 'absolute',
-                            top: '-6px',
-                            right: '-6px',
-                            background: '#e11d48',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '20px',
-                            height: '20px',
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-                          }}
-                          title="Remover foto"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (prodForm.image_url.trim()) {
+                          setProdForm(prev => ({
+                            ...prev,
+                            images_list: [...prev.images_list, prev.image_url.trim()],
+                            image_url: ''
+                          }));
+                        }
+                      }}
+                      className="admin-topbar-btn"
+                      style={{ height: '38px', padding: '0 0.85rem', fontSize: '0.78rem' }}
+                    >
+                      + Link
+                    </button>
                   </div>
                 </div>
 
-                {/* 4. Descrição */}
+                {/* 5. Descrição */}
                 <div className="zom-input-group" style={{ marginBottom: 0 }}>
                   <label className="zom-input-label">Descrição & Cuidados</label>
                   <textarea
