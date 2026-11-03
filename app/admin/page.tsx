@@ -241,13 +241,15 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      showToast('Por favor, selecione um arquivo de imagem válido.', 'error');
+    const fileName = (file.name || '').toLowerCase();
+    const isImage = file.type.startsWith('image/') || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+    if (!isImage) {
+      showToast('Por favor, selecione um arquivo de imagem válido (JPG, PNG, WEBP ou HEIC).', 'error');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('A imagem deve ter no máximo 5MB.', 'error');
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('A imagem deve ter no máximo 20MB.', 'error');
       return;
     }
 
@@ -1559,7 +1561,7 @@ export default function AdminPage() {
                   }}>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.heic,.HEIC,.heif,.HEIF"
                       id="admin-product-file-upload"
                       onChange={handleImageUpload}
                       style={{
@@ -1590,10 +1592,10 @@ export default function AdminPage() {
                         </span>
                       </div>
                       <strong style={{ fontSize: '0.82rem', color: '#1a2234' }}>
-                        {isUploading ? 'Enviando foto...' : 'Escolher foto do celular ou computador'}
+                        {isUploading ? 'Convertendo e enviando foto...' : 'Escolher foto do celular ou computador'}
                       </strong>
                       <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        Formatos JPG, PNG ou WEBP até 5MB
+                        Formatos JPG, PNG, WEBP ou HEIC (iPhone) até 20MB
                       </span>
                     </div>
                   </div>
