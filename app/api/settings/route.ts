@@ -3,28 +3,35 @@ import { getAllSettings, updateSettings } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { requireAuth, logAdminAction } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // 1. Supabase first
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      let { data, error } = await supabase.from('store_settings').select('*');
-      if (error || !data) {
-        const retry = await supabase.from('settings').select('*');
-        data = retry.data;
-      }
-      if (data) {
+      const { data, error } = await supabase.from('store_settings').select('*');
+      if (!error && data) {
         const settingsMap: Record<string, string> = {};
         data.forEach((row: { key: string; value: string }) => {
           settingsMap[row.key] = row.value;
         });
-        return NextResponse.json(settingsMap);
+        return NextResponse.json(settingsMap, {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          }
+        });
       }
     }
 
     // 2. Fallback to SQLite
     const settings = getAllSettings();
-    return NextResponse.json(settings);
+    return NextResponse.json(settings, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+      }
+    });
   } catch {
     return NextResponse.json({ error: 'Erro ao buscar configurações' }, { status: 500 });
   }
@@ -46,9 +53,7 @@ export async function PUT(request: NextRequest) {
 
       const { error } = await supabase.from('store_settings').upsert(upserts, { onConflict: 'key' });
       if (error) {
-        try {
-          await supabase.from('settings').upsert(upserts, { onConflict: 'key' });
-        } catch {}
+        console.error('Erro no upsert store_settings Supabase:', error);
       }
       logAdminAction(user.userId, user.username, 'update_settings', 'settings', undefined, Object.keys(body).join(', '));
       return NextResponse.json({ success: true });

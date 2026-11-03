@@ -38,9 +38,13 @@ interface ProductItem {
   name: string;
   sku: string;
   price: number;
+  promo_price?: number;
   cost_price?: number;
   stock_quantity: number;
   published: number;
+  featured: number;
+  is_new: number;
+  is_promo?: number;
   category_name?: string;
   materials?: string;
   supplier?: string;
@@ -101,6 +105,7 @@ export default function AdminPage() {
     name: '',
     sku: '',
     price: '',
+    promo_price: '',
     cost_price: '',
     category_id: '1',
     stock_quantity: '1',
@@ -108,6 +113,8 @@ export default function AdminPage() {
     supplier: '',
     sizes: '',
     has_sizes: true,
+    featured: false,
+    is_new: false,
     image_url: '',
     images_list: [] as string[],
     description: '',
@@ -214,6 +221,7 @@ export default function AdminPage() {
       name: '',
       sku: `PX-${Date.now().toString().slice(-4)}`,
       price: '',
+      promo_price: '',
       cost_price: '',
       category_id: '1',
       stock_quantity: '1',
@@ -221,6 +229,8 @@ export default function AdminPage() {
       supplier: '',
       sizes: '',
       has_sizes: true,
+      featured: false,
+      is_new: true,
       image_url: '',
       images_list: [],
       description: '',
@@ -245,6 +255,7 @@ export default function AdminPage() {
       name: prod.name,
       sku: prod.sku,
       price: prod.price?.toString() || '',
+      promo_price: prod.promo_price ? prod.promo_price.toString() : '',
       cost_price: prod.cost_price?.toString() || '',
       category_id: '1',
       stock_quantity: prod.stock_quantity?.toString() || '0',
@@ -252,6 +263,8 @@ export default function AdminPage() {
       supplier: prod.supplier || '',
       sizes: prod.sizes || '',
       has_sizes: hasSizes,
+      featured: prod.featured === 1,
+      is_new: prod.is_new === 1,
       image_url: existingImgs[0] || '',
       images_list: existingImgs,
       description: '',
@@ -339,16 +352,23 @@ export default function AdminPage() {
         finalImages = [{ url: prodForm.image_url.trim(), alt: prodForm.name, sort_order: 0, is_primary: 1 }];
       }
 
+      const promoVal = prodForm.promo_price ? parseFloat(prodForm.promo_price) : null;
+      const isPromo = promoVal && promoVal > 0 ? 1 : 0;
+
       const bodyData: Record<string, unknown> = {
         name: prodForm.name,
         sku: prodForm.sku || `PX-${Date.now().toString().slice(-4)}`,
         price: parseFloat(prodForm.price) || 0,
+        promo_price: promoVal,
+        is_promo: isPromo,
         cost_price: parseFloat(prodForm.cost_price) || 0,
         category_id: parseInt(prodForm.category_id) || 1,
         stock_quantity: parseInt(prodForm.stock_quantity) || 0,
         materials: prodForm.materials,
         supplier: prodForm.supplier.trim() || null,
         sizes: finalSizes,
+        featured: prodForm.featured ? 1 : 0,
+        is_new: prodForm.is_new ? 1 : 0,
         description: prodForm.description,
         published: prodForm.published ? 1 : 0,
         images: finalImages
@@ -523,6 +543,30 @@ export default function AdminPage() {
       }
     } catch {
       showToast('Erro ao conectar ao servidor para excluir', 'error');
+    }
+  };
+
+  const toggleMaintenanceMode = async () => {
+    const nextState = !settingsForm.maintenance_mode;
+    setSettingsForm(prev => ({ ...prev, maintenance_mode: nextState }));
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...settingsForm,
+          maintenance_mode: nextState ? 'true' : 'false'
+        })
+      });
+      if (res.ok) {
+        showToast(nextState ? 'Loja pausada com sucesso! Clientes verão a tela de novidades.' : 'Loja liberada e online para todas as clientes!');
+        loadAllData(true);
+      } else {
+        throw new Error();
+      }
+    } catch {
+      setSettingsForm(prev => ({ ...prev, maintenance_mode: !nextState }));
+      showToast('Erro ao atualizar modo manutenção', 'error');
     }
   };
 
@@ -1434,7 +1478,7 @@ export default function AdminPage() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => setSettingsForm(prev => ({ ...prev, maintenance_mode: !prev.maintenance_mode }))}
+                            onClick={toggleMaintenanceMode}
                             style={{
                               padding: '0.5rem 1rem',
                               borderRadius: '999px',
@@ -1597,10 +1641,10 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* 2. Precificação & Estoque */}
+                {/* 2. Precificação & Promoção & Estoque */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                   gap: '0.85rem',
                   backgroundColor: '#f8fafc',
                   padding: '1rem',
@@ -1609,7 +1653,7 @@ export default function AdminPage() {
                   marginBottom: '1.2rem'
                 }}>
                   <div className="zom-input-group" style={{ margin: 0 }}>
-                    <label className="zom-input-label">Preço Venda (R$) *</label>
+                    <label className="zom-input-label">Preço Normal (R$) *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1621,6 +1665,20 @@ export default function AdminPage() {
                       style={{ backgroundColor: '#ffffff' }}
                     />
                   </div>
+
+                  <div className="zom-input-group" style={{ margin: 0 }}>
+                    <label className="zom-input-label">Preço Promoção (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Ex: 99.90"
+                      value={prodForm.promo_price}
+                      onChange={e => setProdForm({ ...prodForm, promo_price: e.target.value })}
+                      className="zom-input"
+                      style={{ backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+
                   <div className="zom-input-group" style={{ margin: 0 }}>
                     <label className="zom-input-label">Preço Custo (R$) *</label>
                     <input
@@ -1634,6 +1692,7 @@ export default function AdminPage() {
                       style={{ backgroundColor: '#ffffff' }}
                     />
                   </div>
+
                   <div className="zom-input-group" style={{ margin: 0 }}>
                     <label className="zom-input-label">Estoque (Qtd)</label>
                     <input
@@ -1644,6 +1703,96 @@ export default function AdminPage() {
                       className="zom-input"
                       style={{ backgroundColor: '#ffffff' }}
                     />
+                  </div>
+                </div>
+
+                {/* BOTÕES DE DESTAQUE: MAIS VENDIDAS & NOVIDADES */}
+                <div style={{
+                  padding: '1rem',
+                  borderRadius: '16px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  marginBottom: '1.2rem'
+                }}>
+                  <label className="zom-input-label" style={{ marginBottom: '0.65rem', display: 'block', fontWeight: 600 }}>
+                    Exibir nas seções principais do site:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                    {/* Botão Mais Vendidas */}
+                    <button
+                      type="button"
+                      onClick={() => setProdForm(prev => ({ ...prev, featured: !prev.featured }))}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        border: prodForm.featured ? '2px solid #566b98' : '1px solid #cbd5e1',
+                        backgroundColor: prodForm.featured ? 'rgba(86, 107, 152, 0.1)' : '#ffffff',
+                        color: prodForm.featured ? '#566b98' : '#64748b',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>star</span>
+                        <span>Mais Vendidas</span>
+                      </div>
+                      <span style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        backgroundColor: prodForm.featured ? '#566b98' : '#e2e8f0',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px'
+                      }}>
+                        {prodForm.featured ? '✓' : ''}
+                      </span>
+                    </button>
+
+                    {/* Botão Novidades */}
+                    <button
+                      type="button"
+                      onClick={() => setProdForm(prev => ({ ...prev, is_new: !prev.is_new }))}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        border: prodForm.is_new ? '2px solid #10b981' : '1px solid #cbd5e1',
+                        backgroundColor: prodForm.is_new ? 'rgba(16, 185, 129, 0.1)' : '#ffffff',
+                        color: prodForm.is_new ? '#059669' : '#64748b',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>auto_awesome</span>
+                        <span>Novidades</span>
+                      </div>
+                      <span style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        backgroundColor: prodForm.is_new ? '#10b981' : '#e2e8f0',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px'
+                      }}>
+                        {prodForm.is_new ? '✓' : ''}
+                      </span>
+                    </button>
                   </div>
                 </div>
 
