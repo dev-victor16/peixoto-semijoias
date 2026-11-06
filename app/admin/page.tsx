@@ -898,12 +898,18 @@ export default function AdminPage() {
                         </button>
                       </div>
                       <div className="admin-stat-row">
-                        <span>Total de peças cadastradas:</span>
-                        <strong>{dashData?.products.total} itens</strong>
+                        <span>Total de modelos cadastrados:</span>
+                        <strong>{dashData?.products.total} modelos</strong>
                       </div>
                       <div className="admin-stat-row">
-                        <span>Itens ativos na vitrine:</span>
-                        <strong>{dashData?.products.published} peças</strong>
+                        <span>Quantidade total de peças em estoque:</span>
+                        <strong style={{ color: '#5B6E9A' }}>
+                          {dashData?.financial.inventory.total_units ?? dashData?.products.total} unidades físicas
+                        </strong>
+                      </div>
+                      <div className="admin-stat-row">
+                        <span>Modelos ativos na vitrine:</span>
+                        <strong>{dashData?.products.published} ativos</strong>
                       </div>
                       <div className="admin-stat-row stat-warning">
                         <span>Alerta de estoque baixo (≤3 un):</span>
@@ -1073,9 +1079,11 @@ export default function AdminPage() {
                     <div className="admin-card-section">
                       <div className="admin-card-section-header" style={{ flexWrap: 'wrap', gap: '1rem' }}>
                         <div>
-                          <h3 className="admin-card-section-title">Estoque de Semijoias ({products.length} peças cadastradas)</h3>
+                          <h3 className="admin-card-section-title">
+                            Estoque de Semijoias ({products.length} modelos cadastrados • {dashData?.financial.inventory.total_units || products.reduce((acc, p) => acc + (p.stock_quantity || 0), 0)} unidades em estoque)
+                          </h3>
                           <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
-                            Gerencie peças, estoques mínimos e precificação.
+                            Gerencie peças, variações por tamanho, estoques mínimos e precificação.
                           </p>
                         </div>
                         <button onClick={openCreateProduct} className="zom-btn-primary">
