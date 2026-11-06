@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getDb } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import ProductCard, { ProductCardData } from '@/components/ProductCard';
+import ProductCarousel from '@/components/ProductCarousel';
 import MobileBannerCarousel from '@/components/MobileBannerCarousel';
 import DesktopBannerCarousel from '@/components/DesktopBannerCarousel';
 
@@ -130,7 +131,7 @@ export default async function HomePage() {
       <DesktopBannerCarousel />
 
       {/* ========================================================
-          2. SEÇÃO: MAIS VENDIDAS
+          2. SEÇÃO: MAIS VENDIDAS (CARROSSEL)
           ======================================================== */}
       <section className="ref-collection-header-section">
         <div className="ref-container">
@@ -142,17 +143,11 @@ export default async function HomePage() {
 
       <section className="ref-products-section">
         <div className="ref-container ref-showcase-container">
-          <div className="ref-products-grid">
-            {bestSellers.length > 0 ? (
-              bestSellers.map(p => (
-                <ProductCard key={`mais-vendida-${p.id}`} product={p} />
-              ))
-            ) : (
-              <div className="ref-empty-showcase">
-                <p>Nenhuma peça selecionada para Mais Vendidas no momento.</p>
-              </div>
-            )}
-          </div>
+          <ProductCarousel
+            products={bestSellers}
+            emptyMessage="Nenhuma peça selecionada para Mais Vendidas no momento."
+            prefixId="mais-vendida"
+          />
         </div>
       </section>
 
@@ -195,7 +190,7 @@ export default async function HomePage() {
       </section>
 
       {/* ========================================================
-          4. SEÇÃO: NOVIDADES
+          4. SEÇÃO: NOVIDADES (CARROSSEL)
           ======================================================== */}
       <section className="ref-collection-header-section" style={{ paddingTop: '1.2rem', paddingBottom: '1.2rem' }}>
         <div className="ref-container">
@@ -207,17 +202,11 @@ export default async function HomePage() {
 
       <section className="ref-products-section">
         <div className="ref-container ref-showcase-container">
-          <div className="ref-products-grid">
-            {newArrivals.length > 0 ? (
-              newArrivals.map(p => (
-                <ProductCard key={`novidade-${p.id}`} product={p} />
-              ))
-            ) : (
-              <div className="ref-empty-showcase">
-                <p>Nenhuma peça selecionada para Novidades no momento.</p>
-              </div>
-            )}
-          </div>
+          <ProductCarousel
+            products={newArrivals}
+            emptyMessage="Nenhuma peça selecionada para Novidades no momento."
+            prefixId="novidade"
+          />
         </div>
       </section>
 

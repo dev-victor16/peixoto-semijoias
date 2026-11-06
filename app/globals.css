@@ -1038,6 +1038,107 @@ button {
   right: -12px;
 }
 
+/* ========================================================
+   CARROSSEL HORIZONTAL DE PRODUTOS (HOME: MAIS VENDIDAS & NOVIDADES)
+   ======================================================== */
+.product-carousel-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.product-carousel-track {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.2rem 1.2rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(86, 107, 152, 0.3) transparent;
+}
+
+.product-carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.product-carousel-track::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.product-carousel-track::-webkit-scrollbar-thumb {
+  background: rgba(86, 107, 152, 0.25);
+  border-radius: 999px;
+}
+
+.product-carousel-item {
+  flex: 0 0 calc((100% - 3.75rem) / 4);
+  min-width: 240px;
+  max-width: 290px;
+  scroll-snap-align: start;
+}
+
+.product-carousel-nav {
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--brand-navy);
+  border: 1px solid rgba(86, 107, 152, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.product-carousel-nav:hover {
+  background: var(--slate-blue);
+  color: #ffffff;
+  border-color: var(--slate-blue);
+  box-shadow: 0 6px 18px rgba(86, 107, 152, 0.35);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.product-carousel-prev {
+  left: -18px;
+}
+
+.product-carousel-next {
+  right: -18px;
+}
+
+@media (max-width: 1024px) {
+  .product-carousel-item {
+    flex: 0 0 calc((100% - 2.5rem) / 3);
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-carousel-track {
+    gap: 0.85rem;
+    padding-bottom: 0.85rem;
+    scrollbar-width: none;
+  }
+  .product-carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+  .product-carousel-item {
+    flex: 0 0 72%;
+    min-width: 200px;
+    max-width: 240px;
+  }
+  .product-carousel-nav {
+    display: none;
+  }
+}
+
 .ref-products-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
