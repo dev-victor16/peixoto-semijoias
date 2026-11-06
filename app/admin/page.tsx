@@ -33,6 +33,11 @@ interface DashboardData {
   }>;
 }
 
+interface SizeStockRow {
+  size: string;
+  stock: number | string;
+}
+
 interface ProductItem {
   id: number;
   name: string;
@@ -49,6 +54,7 @@ interface ProductItem {
   materials?: string;
   supplier?: string;
   sizes?: string;
+  dimensions?: string;
   image?: string;
   primary_image?: string;
   first_image?: string;
@@ -112,6 +118,7 @@ export default function AdminPage() {
     materials: 'Banho a Prata 925 (Antialérgica)',
     supplier: '',
     sizes: '',
+    size_rows: [] as SizeStockRow[],
     has_sizes: true,
     featured: false,
     is_new: false,
@@ -228,6 +235,7 @@ export default function AdminPage() {
       materials: 'Banho a Prata 925 (Antialérgica)',
       supplier: '',
       sizes: '',
+      size_rows: [],
       has_sizes: true,
       featured: false,
       is_new: true,
@@ -249,7 +257,23 @@ export default function AdminPage() {
       if (single) existingImgs.push(single);
     }
 
-    const hasSizes = !!(prod.sizes && prod.sizes.trim().length > 0);
+    // Carregar variações de tamanho com estoque
+    let parsedRows: SizeStockRow[] = [];
+    if (prod.dimensions) {
+      try {
+        const d = JSON.parse(prod.dimensions);
+        if (Array.isArray(d)) parsedRows = d;
+      } catch {}
+    }
+
+    if (parsedRows.length === 0 && prod.sizes && prod.sizes.trim()) {
+      parsedRows = prod.sizes.split(',').map(s => ({
+        size: s.trim(),
+        stock: prod.stock_quantity || 1
+      })).filter(r => r.size.length > 0);
+    }
+
+    const hasSizes = parsedRows.length > 0 || !!(prod.sizes && prod.sizes.trim().length > 0);
 
     setProdForm({
       name: prod.name,
@@ -262,6 +286,7 @@ export default function AdminPage() {
       materials: prod.materials || 'Banho a Prata 925 (Antialérgica)',
       supplier: prod.supplier || '',
       sizes: prod.sizes || '',
+      size_rows: parsedRows,
       has_sizes: hasSizes,
       featured: prod.featured === 1,
       is_new: prod.is_new === 1,
@@ -338,7 +363,27 @@ export default function AdminPage() {
       const url = isEdit ? `/api/products/${editingProduct.id}` : '/api/products';
       const method = isEdit ? 'PUT' : 'POST';
 
-      const finalSizes = prodForm.has_sizes && prodForm.sizes.trim() ? prodForm.sizes.trim() : null;
+      // Processa variações de tamanho com estoque
+      let finalSizes: string | null = null;
+      let finalDimensions: string | null = null;
+      let computedTotalStock = parseInt(prodForm.stock_quantity) || 0;
+
+      if (prodForm.has_sizes) {
+        const validRows = prodForm.size_rows
+          .filter(r => r.size.trim().length > 0)
+          .map(r => ({
+            size: r.size.trim(),
+            stock: parseInt(String(r.stock)) >= 0 ? parseInt(String(r.stock)) : 0
+          }));
+
+        if (validRows.length > 0) {
+          finalSizes = validRows.map(r => r.size).join(', ');
+          finalDimensions = JSON.stringify(validRows);
+          computedTotalStock = validRows.reduce((acc, curr) => acc + curr.stock, 0);
+        } else if (prodForm.sizes.trim()) {
+          finalSizes = prodForm.sizes.trim();
+        }
+      }
 
       // Monta lista de fotos
       let finalImages = prodForm.images_list.map((u, idx) => ({
@@ -363,10 +408,11 @@ export default function AdminPage() {
         is_promo: isPromo,
         cost_price: parseFloat(prodForm.cost_price) || 0,
         category_id: parseInt(prodForm.category_id) || 1,
-        stock_quantity: parseInt(prodForm.stock_quantity) || 0,
+        stock_quantity: computedTotalStock,
         materials: prodForm.materials,
         supplier: prodForm.supplier.trim() || null,
         sizes: finalSizes,
+        dimensions: finalDimensions,
         featured: prodForm.featured ? 1 : 0,
         is_new: prodForm.is_new ? 1 : 0,
         description: prodForm.description,
@@ -1833,16 +1879,124 @@ export default function AdminPage() {
 
                   {prodForm.has_sizes ? (
                     <div>
-                      <input
-                        type="text"
-                        placeholder="Ex: 14, 16, 18, 20 ou 45cm, 50cm (separe por vírgula)"
-                        value={prodForm.sizes}
-                        onChange={e => setProdForm({ ...prodForm, sizes: e.target.value })}
-                        className="zom-input"
-                        style={{ backgroundColor: '#ffffff' }}
-                      />
+                      {/* Tabela de Variações com Estoque Individual */}
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
+                          Variações e Estoque por Tamanho (ex: TAM 16 = 1 unid, TAM 17 = 2 unids):
+                        </span>
+
+                        {prodForm.size_rows.length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                            {prodForm.size_rows.map((row, idx) => (
+                              <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Tamanho (ex: 17, 16, 45cm)"
+                                  value={row.size}
+                                  onChange={e => {
+                                    const val = e.target.value;
+                                    setProdForm(prev => {
+                                      const updated = [...prev.size_rows];
+                                      updated[idx] = { ...updated[idx], size: val };
+                                      return { ...prev, size_rows: updated };
+                                    });
+                                  }}
+                                  className="zom-input"
+                                  style={{ backgroundColor: '#ffffff', flex: 2 }}
+                                />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flex: 1.5 }}>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Qtd estoque"
+                                    value={row.stock}
+                                    onChange={e => {
+                                      const val = e.target.value;
+                                      setProdForm(prev => {
+                                        const updated = [...prev.size_rows];
+                                        updated[idx] = { ...updated[idx], stock: val };
+                                        return { ...prev, size_rows: updated };
+                                      });
+                                    }}
+                                    className="zom-input"
+                                    style={{ backgroundColor: '#ffffff', width: '100%' }}
+                                  />
+                                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>un</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setProdForm(prev => ({
+                                      ...prev,
+                                      size_rows: prev.size_rows.filter((_, i) => i !== idx)
+                                    }));
+                                  }}
+                                  style={{
+                                    border: 'none',
+                                    background: '#fee2e2',
+                                    color: '#ef4444',
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.85rem'
+                                  }}
+                                  title="Remover tamanho"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProdForm(prev => ({
+                              ...prev,
+                              size_rows: [...prev.size_rows, { size: '', stock: '1' }]
+                            }));
+                          }}
+                          style={{
+                            padding: '0.45rem 0.85rem',
+                            borderRadius: '8px',
+                            border: '1px dashed #566b98',
+                            backgroundColor: 'rgba(86, 107, 152, 0.05)',
+                            color: '#566b98',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            marginBottom: '0.5rem'
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>add</span>
+                          Adicionar Tamanho com Estoque
+                        </button>
+                      </div>
+
+                      {/* Se não houver linhas individuais criadas, permite texto livre alternativo */}
+                      {prodForm.size_rows.length === 0 && (
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Ou digite separado por vírgula (ex: 14, 16, 18, 20)"
+                            value={prodForm.sizes}
+                            onChange={e => setProdForm({ ...prodForm, sizes: e.target.value })}
+                            className="zom-input"
+                            style={{ backgroundColor: '#ffffff' }}
+                          />
+                        </div>
+                      )}
+
                       <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginTop: '0.35rem' }}>
-                        Separe os tamanhos por vírgula. Se a peça não tiver variação de tamanho, clique no botão &ldquo;Sem tamanho&rdquo; acima.
+                        Adicione cada tamanho e sua quantidade. Se a peça não tiver variação de tamanho, clique em &ldquo;Sem tamanho&rdquo; acima.
                       </span>
                     </div>
                   ) : (

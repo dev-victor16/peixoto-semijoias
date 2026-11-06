@@ -10,6 +10,11 @@ interface ProductImage {
   sort_order: number;
 }
 
+interface SizeVariation {
+  size: string;
+  stock: number;
+}
+
 interface ProductDetailData {
   id: number;
   name: string;
@@ -22,6 +27,7 @@ interface ProductDetailData {
   materials?: string;
   care_instructions?: string;
   sizes?: string;
+  dimensions?: string;
   stock_quantity: number;
   category_name?: string;
   category_slug?: string;
@@ -36,18 +42,34 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const [stockError, setStockError] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  // Parse available sizes
-  const availableSizes = React.useMemo(() => {
-    if (!product.sizes || !product.sizes.trim()) return [];
-    return product.sizes
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-  }, [product.sizes]);
+  // Parse variations with specific stock per size
+  const sizeVariations = React.useMemo<SizeVariation[]>(() => {
+    if (product.dimensions) {
+      try {
+        const parsed = JSON.parse(product.dimensions);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(v => v.size && typeof v.stock === 'number');
+        }
+      } catch {}
+    }
+    // Fallback para string simples de tamanhos
+    if (product.sizes && product.sizes.trim()) {
+      return product.sizes
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => ({ size: s, stock: product.stock_quantity || 1 }));
+    }
+    return [];
+  }, [product.dimensions, product.sizes, product.stock_quantity]);
 
   const [selectedSize, setSelectedSize] = useState<string>(() => {
-    return availableSizes.length > 0 ? availableSizes[0] : '';
+    return sizeVariations.length > 0 ? sizeVariations[0].size : '';
   });
+
+  // Estoque específico do tamanho selecionado
+  const currentSizeVariation = sizeVariations.find(v => v.size === selectedSize);
+  const currentAvailableStock = currentSizeVariation ? currentSizeVariation.stock : product.stock_quantity;
 
   const images = product.images.length > 0
     ? product.images
@@ -85,8 +107,14 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const handleAddToCart = () => {
     setStockError(null);
 
-    if (availableSizes.length > 0 && !selectedSize) {
+    if (sizeVariations.length > 0 && !selectedSize) {
       setStockError('Por favor, selecione um tamanho antes de adicionar à sacola.');
+      setTimeout(() => setStockError(null), 3000);
+      return;
+    }
+
+    if (currentAvailableStock <= 0) {
+      setStockError(`O tamanho ${selectedSize} está esgotado no momento.`);
       setTimeout(() => setStockError(null), 3000);
       return;
     }
@@ -105,7 +133,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       image: currentImage.url,
       variation_type: selectedSize ? 'Tamanho' : 'Material',
       variation_value: variationDetails,
-      stock_available: product.stock_quantity
+      stock_available: currentAvailableStock
     });
 
     if (result.success) {
@@ -245,38 +273,61 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         </div>
 
         {/* Seletor de Tamanhos (se a peça possuir tamanhos cadastrados) */}
-        {availableSizes.length > 0 && (
+        {sizeVariations.length > 0 && (
           <div style={{ marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
                 Tamanho: <strong style={{ color: '#566b98' }}>{selectedSize || 'Selecione'}</strong>
               </span>
+              {currentSizeVariation && (
+                <span style={{ fontSize: '0.75rem', color: currentSizeVariation.stock > 0 ? '#10b981' : '#ef4444', fontWeight: 500 }}>
+                  {currentSizeVariation.stock > 0 ? `${currentSizeVariation.stock} disponível(is)` : 'Esgotado'}
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {availableSizes.map(size => {
-                const isSelected = selectedSize === size;
+              {sizeVariations.map(v => {
+                const isSelected = selectedSize === v.size;
+                const isOutOfStock = v.stock <= 0;
                 return (
                   <button
-                    key={size}
+                    key={v.size}
                     type="button"
-                    onClick={() => setSelectedSize(size)}
+                    disabled={isOutOfStock}
+                    onClick={() => {
+                      setSelectedSize(v.size);
+                      setQuantity(1);
+                    }}
                     style={{
-                      minWidth: '42px',
-                      height: '38px',
+                      minWidth: '46px',
+                      height: '40px',
                       padding: '0 0.85rem',
                       borderRadius: '8px',
                       border: isSelected ? '2px solid #566b98' : '1px solid #e2e8f0',
-                      background: isSelected ? 'rgba(86, 107, 152, 0.08)' : '#ffffff',
-                      color: isSelected ? '#566b98' : '#334155',
+                      background: isOutOfStock 
+                        ? '#f1f5f9' 
+                        : isSelected ? 'rgba(86, 107, 152, 0.08)' : '#ffffff',
+                      color: isOutOfStock 
+                        ? '#94a3b8' 
+                        : isSelected ? '#566b98' : '#334155',
                       fontWeight: isSelected ? 600 : 500,
                       fontSize: '0.85rem',
-                      cursor: 'pointer',
+                      cursor: isOutOfStock ? 'not-allowed' : 'pointer',
                       transition: 'all 0.15s ease',
                       outline: 'none',
-                      boxShadow: isSelected ? '0 2px 6px rgba(86, 107, 152, 0.15)' : 'none'
+                      textDecoration: isOutOfStock ? 'line-through' : 'none',
+                      boxShadow: isSelected ? '0 2px 6px rgba(86, 107, 152, 0.15)' : 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: 1.1
                     }}
                   >
-                    {size}
+                    <span>{v.size}</span>
+                    <span style={{ fontSize: '9px', opacity: 0.75 }}>
+                      {v.stock > 0 ? `${v.stock} un` : 'sem estoque'}
+                    </span>
                   </button>
                 );
               })}
@@ -303,10 +354,10 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               type="button"
               className="ref-qty-btn"
               onClick={() => {
-                if (quantity < (product.stock_quantity || 1)) {
+                if (quantity < (currentAvailableStock || 1)) {
                   setQuantity(quantity + 1);
                 } else {
-                  setStockError(`Temos apenas ${product.stock_quantity || 1} unidade(s) em estoque.`);
+                  setStockError(`Temos apenas ${currentAvailableStock || 1} unidade(s) disponíveis deste tamanho.`);
                   setTimeout(() => setStockError(null), 3000);
                 }
               }}

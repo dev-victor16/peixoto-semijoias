@@ -28,6 +28,7 @@ interface ProductDetailData {
   materials?: string;
   care_instructions?: string;
   sizes?: string;
+  dimensions?: string;
   stock_quantity: number;
   category_name?: string;
   category_slug?: string;
@@ -45,7 +46,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
         .from('products')
         .select(`
           id, name, slug, sku, price, promo_price, is_promo, description,
-          materials, care_instructions, sizes, stock_quantity, published,
+          materials, care_instructions, sizes, dimensions, stock_quantity, published,
           categories (id, name, slug),
           product_images (id, url, alt, is_primary, sort_order)
         `)
@@ -59,7 +60,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
           .from('products')
           .select(`
             id, name, slug, sku, price, promo_price, is_promo, description,
-            materials, care_instructions, stock_quantity, published,
+            materials, care_instructions, dimensions, stock_quantity, published,
             categories (id, name, slug),
             product_images (id, url, alt, is_primary, sort_order)
           `)
@@ -95,6 +96,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
           materials: data.materials || 'Semijoia banhada a prata 925 com acabamento nobre e tecnologia antialérgica.',
           care_instructions: data.care_instructions || 'Evite contato com água do mar, piscina, perfumes e produtos químicos para preservar o brilho.',
           sizes: (data as any).sizes || undefined,
+          dimensions: (data as any).dimensions || undefined,
           stock_quantity: data.stock_quantity ?? 10,
           category_name: cat?.name || 'Semijoias',
           category_slug: cat?.slug || 'semijoias',
@@ -137,6 +139,7 @@ async function getProductBySlug(slug: string): Promise<ProductDetailData | null>
       materials: row.materials || 'Semijoia banhada a prata 925 com acabamento nobre e tecnologia antialérgica.',
       care_instructions: row.care_instructions || 'Evite contato com água do mar, piscina, perfumes e produtos químicos para preservar o brilho.',
       sizes: row.sizes || undefined,
+      dimensions: row.dimensions || undefined,
       stock_quantity: row.stock_quantity ?? 10,
       category_name: row.category_name || 'Semijoias',
       category_slug: row.category_slug || 'semijoias',
