@@ -65,6 +65,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
         return NextResponse.json({
           ...supaProd,
+          supplier: supaProd.supplier || supaProd.weight || null,
           category_name: cat?.name || null,
           category_slug: cat?.slug || null,
           effective_price: hasActivePromo ? supaProd.promo_price : supaProd.price,
@@ -181,7 +182,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (low_stock_threshold !== undefined) updateData.low_stock_threshold = low_stock_threshold;
       if (materials !== undefined) updateData.materials = materials;
       if (care_instructions !== undefined) updateData.care_instructions = care_instructions;
-      if (supplier !== undefined) updateData.supplier = supplier;
+      if (supplier !== undefined) {
+        updateData.supplier = supplier;
+        updateData.weight = supplier;
+      }
       if (sizes !== undefined) updateData.sizes = sizes;
       if (weight !== undefined) updateData.weight = weight;
       if (dimensions !== undefined) updateData.dimensions = dimensions;

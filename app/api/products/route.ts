@@ -66,6 +66,7 @@ export async function GET(request: NextRequest) {
 
           return {
             ...p,
+            supplier: p.supplier || p.weight || null,
             category_name: cat?.name || null,
             category_slug: cat?.slug || null,
             primary_image: primaryImg || firstImg || null,
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
         care_instructions: care_instructions || null,
         supplier: supplier || null,
         sizes: sizes || null,
-        weight: weight || null,
+        weight: supplier || weight || null,
         dimensions: dimensions || null,
         published: published !== undefined ? (published ? 1 : 0) : 1,
         featured: featured ? 1 : 0,
