@@ -1897,12 +1897,17 @@ export default function AdminPage() {
                         </span>
 
                         {prodForm.size_rows.length > 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '0.85rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 40px', gap: '0.5rem', padding: '0 0.2rem' }}>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Tamanho</span>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Qtd Estoque</span>
+                              <span />
+                            </div>
                             {prodForm.size_rows.map((row, idx) => (
-                              <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 40px', gap: '0.5rem', alignItems: 'center' }}>
                                 <input
                                   type="text"
-                                  placeholder="Tamanho (ex: 17, 16, 45cm)"
+                                  placeholder="Ex: 17, 16, 45cm"
                                   value={row.size}
                                   onChange={e => {
                                     const val = e.target.value;
@@ -1913,13 +1918,13 @@ export default function AdminPage() {
                                     });
                                   }}
                                   className="zom-input"
-                                  style={{ backgroundColor: '#ffffff', flex: 2 }}
+                                  style={{ backgroundColor: '#ffffff', padding: '0.65rem 0.85rem', fontSize: '0.88rem' }}
                                 />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flex: 1.5 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid rgba(0, 0, 0, 0.08)', padding: '0.2rem 0.65rem' }}>
                                   <input
                                     type="number"
                                     min="0"
-                                    placeholder="Qtd estoque"
+                                    placeholder="1"
                                     value={row.stock}
                                     onChange={e => {
                                       const val = e.target.value;
@@ -1929,10 +1934,18 @@ export default function AdminPage() {
                                         return { ...prev, size_rows: updated };
                                       });
                                     }}
-                                    className="zom-input"
-                                    style={{ backgroundColor: '#ffffff', width: '100%' }}
+                                    style={{
+                                      width: '100%',
+                                      border: 'none',
+                                      outline: 'none',
+                                      fontSize: '0.92rem',
+                                      fontWeight: 700,
+                                      color: '#1a2234',
+                                      background: 'transparent',
+                                      padding: '0.45rem 0'
+                                    }}
                                   />
-                                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>un</span>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>un</span>
                                 </div>
                                 <button
                                   type="button"
@@ -1946,14 +1959,15 @@ export default function AdminPage() {
                                     border: 'none',
                                     background: '#fee2e2',
                                     color: '#ef4444',
-                                    width: '32px',
-                                    height: '32px',
-                                    borderRadius: '8px',
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '10px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: '0.85rem'
+                                    fontSize: '0.9rem',
+                                    fontWeight: 700
                                   }}
                                   title="Remover tamanho"
                                 >
