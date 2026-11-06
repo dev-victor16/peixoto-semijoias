@@ -50,6 +50,7 @@ interface ProductItem {
   featured: number;
   is_new: number;
   is_promo?: number;
+  category_id?: number | string;
   category_name?: string;
   materials?: string;
   supplier?: string;
@@ -275,13 +276,15 @@ export default function AdminPage() {
 
     const hasSizes = parsedRows.length > 0 || !!(prod.sizes && prod.sizes.trim().length > 0);
 
+    const catIdStr = prod.category_id ? String(prod.category_id) : '1';
+
     setProdForm({
       name: prod.name,
       sku: prod.sku,
       price: prod.price?.toString() || '',
       promo_price: prod.promo_price ? prod.promo_price.toString() : '',
       cost_price: prod.cost_price?.toString() || '',
-      category_id: '1',
+      category_id: catIdStr,
       stock_quantity: prod.stock_quantity?.toString() || '0',
       materials: prod.materials || 'Banho a Prata 925 (Antialérgica)',
       supplier: prod.supplier || '',
